@@ -74,7 +74,6 @@ def cmd_stdout(*args):
     if not os.path.lexists(pw_file):
         die("No password called '%s'" % pwname)
 
-    #passwd = getpass.getpass()
     gpg_args = (GPG_BIN, "-d", pw_file)
     pipe = subprocess.Popen(gpg_args,
             stdin=sys.stdin, stdout=subprocess.PIPE,
