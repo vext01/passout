@@ -44,9 +44,14 @@ def get_password(cfg, pwname):
     # Have not found a way for this to work with mutt+msmtp without using
     # a GUI pinentry. /dev/tty not configured. Annoying XXX
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "--no-tty", "-d", pw_file)
-    pipe = subprocess.Popen(gpg_args,
-            stdin=sys.stdin, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, universal_newlines=True)
+
+    try:
+        pipe = subprocess.Popen(gpg_args,
+                stdin=sys.stdin, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, universal_newlines=True)
+    except FileNotFoundError:
+        die("GPG utility '%s' not found" % cfg["gpg"])
+
     (out, err) = pipe.communicate()
 
     if pipe.returncode != 0:
@@ -104,8 +109,13 @@ def cmd_add(cfg, *args):
 
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e",
             "-o", out_file, "-r", cfg["id"])
-    pipe = subprocess.Popen(gpg_args,
-            stdin=subprocess.PIPE, universal_newlines=True)
+
+    try:
+        pipe = subprocess.Popen(gpg_args,
+                stdin=subprocess.PIPE, universal_newlines=True)
+    except FileNotFoundError:
+        die("GPG utility '%s' not found" % cfg["gpg"])
+
     (out, err) = pipe.communicate(passwd)
 
     if pipe.returncode != 0:
@@ -141,7 +151,7 @@ def cmd_clip(cfg, *args):
         pipe = subprocess.Popen(cfg["xclip"],
                 stdin=subprocess.PIPE, universal_newlines=True)
     except FileNotFoundError:
-        die("Utility '%s' not found" % cfg["xclip"])
+        die("Xclip utility '%s' not found" % cfg["xclip"])
 
     (out, err) = pipe.communicate(passwd)
 
