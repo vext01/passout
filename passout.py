@@ -13,6 +13,7 @@ def usage(retcode):
     print("  add <pass_name>")
     print("  rm <pass_name>")
     print("  stdout <pass_name>")
+    print("  clip <pass_name>")
     print("  printconfig")
     sys.exit(retcode)
 
@@ -34,8 +35,27 @@ def check_dirs():
 def get_pass_file(passname):
     return os.path.join(CRYPTO_DIR, passname) + ".gpg"
 
+def get_password(cfg, pwname):
+    pw_file = get_pass_file(pwname)
+
+    if not os.path.lexists(pw_file):
+        die("No password called '%s'" % pwname)
+
+    # Have not found a way for this to work with mutt+msmtp without using
+    # a GUI pinentry. /dev/tty not configured. Annoying XXX
+    gpg_args = (cfg["gpg"], "-u", cfg["id"], "--no-tty", "-d", pw_file)
+    pipe = subprocess.Popen(gpg_args,
+            stdin=sys.stdin, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, universal_newlines=True)
+    (out, err) = pipe.communicate()
+
+    if pipe.returncode != 0:
+        die("gpg returned non-zero\nSTDOUT: %s\nSTDERR: %s" % (out, err))
+
+    return out
+
 # keys that can appear in the config file.
-VALID_CONFIG_KEYS = ["gpg", "id"]
+VALID_CONFIG_KEYS = ["gpg", "id", "xclip"]
 def get_config():
     """ return a configuration (using config file if exists) """
 
@@ -43,6 +63,7 @@ def get_config():
     cfg = {
             "gpg" :     "gpg2",
             "id" :      None,
+            "xclip" :   "xclip",
     }
 
     if not os.path.lexists(CONFIG_FILE):
@@ -108,24 +129,25 @@ def cmd_rm(cfg, *args):
 def cmd_stdout(cfg, *args):
     """ Prints a password out of stdout (for use with, e.g. mutt) """
     (pwname, ) = args
+    print(get_password(cfg, pwname))
 
-    pw_file = get_pass_file(pwname)
+def cmd_clip(cfg, *args):
+    """ Puts a password in the GUI clipboard """
 
-    if not os.path.lexists(pw_file):
-        die("No password called '%s'" % pwname)
+    (pwname, ) = args
+    passwd = get_password(cfg, pwname)
 
-    # Have not found a way for this to work with mutt+msmtp without using
-    # a GUI pinentry. /dev/tty not configured. Annoying XXX
-    gpg_args = (cfg["gpg"], "-u", cfg["id"], "--no-tty", "-d", pw_file)
-    pipe = subprocess.Popen(gpg_args,
-            stdin=sys.stdin, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, universal_newlines=True)
-    (out, err) = pipe.communicate()
+    try:
+        pipe = subprocess.Popen(cfg["xclip"],
+                stdin=subprocess.PIPE, universal_newlines=True)
+    except FileNotFoundError:
+        die("Utility '%s' not found" % cfg["xclip"])
+
+    (out, err) = pipe.communicate(passwd)
 
     if pipe.returncode != 0:
-        die("gpg returned non-zero\nSTDOUT: %s\nSTDERR: %s" % (out, err))
-
-    print(out)
+        die("'%s' returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
+                (cfg["xclip"], out, err))
 
 def cmd_printconfig(cfg, *args):
     print(cfg)
@@ -137,6 +159,7 @@ CMD_TAB = {
     "add" :         (1, cmd_add),
     "rm" :          (1, cmd_rm),
     "stdout" :      (1, cmd_stdout),
+    "clip" :        (1, cmd_clip),
     "printconfig" : (0, cmd_printconfig),
 }
 def entrypoint():
