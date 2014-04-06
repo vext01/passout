@@ -1,11 +1,9 @@
 #!/usr/bin/env python3.3
 import sys, os, logging, io, getpass, subprocess
-from tmp import GPG_ID # XXX
 
- # configurable XXX
-GPG_BIN = "gpg2"
 PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
 CRYPTO_DIR = os.path.join(PASSOUT_DIR, "crytpo_store")
+CONFIG_FILE = os.path.join(PASSOUT_DIR, "passoutrc")
 
 def usage(retcode):
     """ Print usage and exit """
@@ -13,6 +11,9 @@ def usage(retcode):
     print("Available commands:")
     print("  ls")
     print("  add <pass_name>")
+    print("  rm <pass_name>")
+    print("  stdout <pass_name>")
+    print("  printconfig")
     sys.exit(retcode)
 
 def die(msg):
@@ -33,7 +34,45 @@ def check_dirs():
 def get_pass_file(passname):
     return os.path.join(CRYPTO_DIR, passname) + ".gpg"
 
-def cmd_add(*args):
+# keys that can appear in the config file.
+VALID_CONFIG_KEYS = ["gpg", "id"]
+def get_config():
+    """ return a configuration (using config file if exists) """
+
+    # default config
+    cfg = {
+            "gpg" :     "gpg2",
+            "id" :      None,
+    }
+
+    if not os.path.lexists(CONFIG_FILE):
+        die("Please create the config file '%s'" % CONFIG_FILE)
+
+    with open(CONFIG_FILE, "r") as fh:
+        line_no = 0
+        for line in fh:
+            line_no += 1
+            line = line.strip()
+            if line.startswith("#") or line == "":
+                continue
+
+            elems = line.split("=")
+            if len(elems) != 2:
+                die("config file '%s': syntax error on line %d" %
+                        (CONFIG_FILE, line_no))
+            (key, val) = elems
+
+            if key not in VALID_CONFIG_KEYS:
+                die("config file '%s': unknown key '%s' on line %d" %
+                        (CONFIG_FILE, key, line_no))
+            cfg[key] = val
+
+    if not cfg["id"]:
+        die("please set 'id=<email>' (your gpg id) in the '%s'" % CONFIG_FILE)
+
+    return cfg
+
+def cmd_add(cfg, *args):
     (pwname, ) = args
 
     out_file = get_pass_file(pwname)
@@ -42,7 +81,8 @@ def cmd_add(*args):
 
     passwd = getpass.getpass()
 
-    gpg_args = (GPG_BIN, "-e", "-o", out_file, "-r", GPG_ID)
+    gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e",
+            "-o", out_file, "-r", cfg["id"])
     pipe = subprocess.Popen(gpg_args,
             stdin=subprocess.PIPE, universal_newlines=True)
     (out, err) = pipe.communicate(passwd)
@@ -50,12 +90,12 @@ def cmd_add(*args):
     if pipe.returncode != 0:
         die("gpg returned non-zero")
 
-def cmd_ls(*args):
+def cmd_ls(cfg, *args):
     for e in os.listdir(CRYPTO_DIR):
         if e.endswith(".gpg"):
             print(e[:-4])
 
-def cmd_rm(*args):
+def cmd_rm(cfg, *args):
     (pwname, ) = args
 
     pw_file = get_pass_file(pwname)
@@ -65,7 +105,7 @@ def cmd_rm(*args):
 
     os.unlink(pw_file)
 
-def cmd_stdout(*args):
+def cmd_stdout(cfg, *args):
     """ Prints a password out of stdout (for use with, e.g. mutt) """
     (pwname, ) = args
 
@@ -76,7 +116,7 @@ def cmd_stdout(*args):
 
     # Have not found a way for this to work with mutt+msmtp without using
     # a GUI pinentry. /dev/tty not configured. Annoying XXX
-    gpg_args = (GPG_BIN, "--no-tty", "-d", pw_file)
+    gpg_args = (cfg["gpg"], "-u", cfg["id"], "--no-tty", "-d", pw_file)
     pipe = subprocess.Popen(gpg_args,
             stdin=sys.stdin, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, universal_newlines=True)
@@ -87,6 +127,9 @@ def cmd_stdout(*args):
 
     print(out)
 
+def cmd_printconfig(cfg, *args):
+    print(cfg)
+
 # Table of commands
 # command_name : (n_args, func)
 CMD_TAB = {
@@ -94,12 +137,14 @@ CMD_TAB = {
     "add" :         (1, cmd_add),
     "rm" :          (1, cmd_rm),
     "stdout" :      (1, cmd_stdout),
+    "printconfig" : (0, cmd_printconfig),
 }
 def entrypoint():
     """ Execution begins here """
 
     logging.basicConfig(level=logging.INFO)
     check_dirs()
+    cfg = get_config()
 
     try:
         cmd = sys.argv[1]
@@ -116,7 +161,7 @@ def entrypoint():
     if n_args != expect_n_args:
         die("Wrong argument count for command '%s'" % cmd)
 
-    func(*sys.argv[2:])
+    func(cfg, *sys.argv[2:])
 
 if __name__ == "__main__":
     entrypoint()
