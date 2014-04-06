@@ -74,7 +74,9 @@ def cmd_stdout(*args):
     if not os.path.lexists(pw_file):
         die("No password called '%s'" % pwname)
 
-    gpg_args = (GPG_BIN, "-d", pw_file)
+    # Have not found a way for this to work with mutt+msmtp without using
+    # a GUI pinentry. /dev/tty not configured. Annoying XXX
+    gpg_args = (GPG_BIN, "--no-tty", "-d", pw_file)
     pipe = subprocess.Popen(gpg_args,
             stdin=sys.stdin, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, universal_newlines=True)
