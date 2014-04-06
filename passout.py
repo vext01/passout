@@ -36,11 +36,11 @@ def get_pass_file(passname):
 def cmd_add(*args):
     (pwname, ) = args
 
-    passwd = getpass.getpass()
     out_file = get_pass_file(pwname)
-
     if os.path.lexists(out_file):
         die("A password called '%s' already exists" % pwname)
+
+    passwd = getpass.getpass()
 
     gpg_args = (GPG_BIN, "-e", "-o", out_file, "-r", GPG_ID)
     pipe = subprocess.Popen(gpg_args,
@@ -65,12 +65,34 @@ def cmd_rm(*args):
 
     os.unlink(pw_file)
 
+def cmd_stdout(*args):
+    """ Prints a password out of stdout (for use with, e.g. mutt) """
+    (pwname, ) = args
+
+    pw_file = get_pass_file(pwname)
+
+    if not os.path.lexists(pw_file):
+        die("No password called '%s'" % pwname)
+
+    #passwd = getpass.getpass()
+    gpg_args = (GPG_BIN, "-d", pw_file)
+    pipe = subprocess.Popen(gpg_args,
+            stdin=sys.stdin, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, universal_newlines=True)
+    (out, err) = pipe.communicate()
+
+    if pipe.returncode != 0:
+        die("gpg returned non-zero\nSTDOUT: %s\nSTDERR: %s" % (out, err))
+
+    print(out)
+
 # Table of commands
 # command_name : (n_args, func)
 CMD_TAB = {
     "ls" :          (0, cmd_ls),
     "add" :         (1, cmd_add),
     "rm" :          (1, cmd_rm),
+    "stdout" :      (1, cmd_stdout),
 }
 def entrypoint():
     """ Execution begins here """
