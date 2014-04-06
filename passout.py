@@ -14,7 +14,7 @@ def usage(retcode):
 
 def die(msg):
     """ Exit with a failure message """
-    loggin.error(msg)
+    logging.error(msg)
     sys.exit(666)
 
 def check_dirs():
@@ -27,13 +27,36 @@ def check_dirs():
         if not os.path.isdir(d):
             die("'%s' is not a directory" % d)
 
+def cmd_list(*args):
+    pass
+
+# Table of commands
+# command_name : (n_args, func)
+CMD_TAB = {
+    "list" :        (0, cmd_list),
+}
 def entrypoint():
     """ Execution begins here """
+
     logging.basicConfig(level=logging.INFO)
     check_dirs()
 
-    # XXX argparse or getopt
+    try:
+        cmd = sys.argv[1]
+    except IndexError:
+        usage(666)
 
+    try:
+        (expect_n_args, func) = CMD_TAB[cmd]
+    except KeyError:
+        die("Unknown command '%s'" % cmd)
+        usage(666)
+
+    n_args = len(sys.argv) - 2
+    if n_args != expect_n_args:
+        die("Wrong argument count for command '%s'" % cmd)
+
+    func(sys.argv[2:])
 
 if __name__ == "__main__":
     entrypoint()
