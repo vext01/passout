@@ -60,7 +60,6 @@ def get_password(cfg, pwname):
     return out
 
 # keys that can appear in the config file.
-VALID_CONFIG_KEYS = ["gpg", "id", "xclip"]
 def get_config():
     """ return a configuration (using config file if exists) """
 
@@ -88,7 +87,7 @@ def get_config():
                         (CONFIG_FILE, line_no))
             (key, val) = elems
 
-            if key not in VALID_CONFIG_KEYS:
+            if key not in cfg.keys():
                 die("config file '%s': unknown key '%s' on line %d" %
                         (CONFIG_FILE, key, line_no))
             cfg[key] = val
