@@ -49,7 +49,9 @@ def cmd_add(*args):
         die("gpg returned non-zero")
 
 def cmd_ls(*args):
-    pass
+    for e in os.listdir(CRYPTO_DIR):
+        if e.endswith(".gpg"):
+            print(e[:-4])
 
 # Table of commands
 # command_name : (n_args, func)
