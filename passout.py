@@ -30,12 +30,14 @@ def check_dirs():
         if not os.path.isdir(d):
             die("'%s' is not a directory" % d)
 
+def get_pass_file(passname):
+    return os.path.join(CRYPTO_DIR, passname) + ".gpg"
+
 def cmd_add(*args):
     (pwname, ) = args
 
-    # XXX check for existing password of that name
     passwd = getpass.getpass()
-    out_file = os.path.join(CRYPTO_DIR, pwname) + ".gpg"
+    out_file = get_pass_file(pwname)
 
     if os.path.lexists(out_file):
         die("A password called '%s' already exists" % pwname)
@@ -53,11 +55,22 @@ def cmd_ls(*args):
         if e.endswith(".gpg"):
             print(e[:-4])
 
+def cmd_rm(*args):
+    (pwname, ) = args
+
+    pw_file = get_pass_file(pwname)
+
+    if not os.path.lexists(pw_file):
+        die("No password named '%s'" % pwname)
+
+    os.unlink(pw_file)
+
 # Table of commands
 # command_name : (n_args, func)
 CMD_TAB = {
-    "ls" :        (0, cmd_ls),
+    "ls" :          (0, cmd_ls),
     "add" :         (1, cmd_add),
+    "rm" :          (1, cmd_rm),
 }
 def entrypoint():
     """ Execution begins here """
