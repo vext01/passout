@@ -1,6 +1,9 @@
 #!/usr/bin/env python3.3
-import sys, os, logging
+import sys, os, logging, io, getpass, subprocess
+from tmp import GPG_ID # XXX
 
+ # configurable XXX
+GPG_BIN = "gpg2"
 PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
 CRYPTO_DIR = os.path.join(PASSOUT_DIR, "crytpo_store")
 
@@ -8,7 +11,7 @@ def usage(retcode):
     """ Print usage and exit """
     print("Usage: passout.py <command> <args>\n")
     print("Available commands:")
-    print("  list")
+    print("  ls")
     print("  add <pass_name>")
     sys.exit(retcode)
 
@@ -27,13 +30,32 @@ def check_dirs():
         if not os.path.isdir(d):
             die("'%s' is not a directory" % d)
 
-def cmd_list(*args):
+def cmd_add(*args):
+    (pwname, ) = args
+
+    # XXX check for existing password of that name
+    passwd = getpass.getpass()
+    out_file = os.path.join(CRYPTO_DIR, pwname) + ".gpg"
+
+    if os.path.lexists(out_file):
+        die("A password called '%s' already exists" % pwname)
+
+    gpg_args = (GPG_BIN, "-e", "-o", out_file, "-r", GPG_ID)
+    pipe = subprocess.Popen(gpg_args,
+            stdin=subprocess.PIPE, universal_newlines=True)
+    (out, err) = pipe.communicate(passwd)
+
+    if pipe.returncode != 0:
+        die("gpg returned non-zero")
+
+def cmd_ls(*args):
     pass
 
 # Table of commands
 # command_name : (n_args, func)
 CMD_TAB = {
-    "list" :        (0, cmd_list),
+    "ls" :        (0, cmd_ls),
+    "add" :         (1, cmd_add),
 }
 def entrypoint():
     """ Execution begins here """
@@ -56,7 +78,7 @@ def entrypoint():
     if n_args != expect_n_args:
         die("Wrong argument count for command '%s'" % cmd)
 
-    func(sys.argv[2:])
+    func(*sys.argv[2:])
 
 if __name__ == "__main__":
     entrypoint()
