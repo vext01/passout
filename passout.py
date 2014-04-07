@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.3
-import sys, os, logging, io, getpass, subprocess
+import sys, os, logging, io, getpass, subprocess, stat
 
 PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
 CRYPTO_DIR = os.path.join(PASSOUT_DIR, "crytpo_store")
@@ -119,6 +119,12 @@ def cmd_add(cfg, *args):
 
     if pipe.returncode != 0:
         die("gpg returned non-zero")
+
+    # XXX: technically there is a race here, as there is a fraction of a
+    # microsecond where the file is not mode 0400, however, since the
+    # file is encrypted, this is not a huge problem.
+    # TODO: capture stdoutof gpg, create file, chmod file, write file
+    os.chmod(out_file, stat.S_IRUSR)
 
 def cmd_ls(cfg, *args):
     for e in os.listdir(CRYPTO_DIR):
