@@ -74,7 +74,7 @@ passout.py clip my-email
 
 If you don't want to type your GPG password every time, you can use `gpg-agent`
 with your X11 session. If you are using a `.xinitrc` or a `.xsession` (i.e.
-you use `xdm`) then you can add something like:
+you use `startx` or `xdm`) then you can add something like:
 
 ```
 eval `/usr/local/bin/gpg-agent --daemon --pinentry-program /usr/local/bin/pinentry-gtk-2`
