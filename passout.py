@@ -105,26 +105,21 @@ def cmd_add(cfg, *args):
         die("A password called '%s' already exists" % pwname)
 
     passwd = getpass.getpass()
+    gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
 
-    gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e",
-            "-o", out_file, "-r", cfg["id"])
-
+    fd = os.open(out_file, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR)
     try:
         pipe = subprocess.Popen(gpg_args,
-                stdin=subprocess.PIPE, universal_newlines=True)
+                stdin=subprocess.PIPE, stdout=fd,
+                universal_newlines=True)
     except FileNotFoundError:
         die("GPG utility '%s' not found" % cfg["gpg"])
 
     (out, err) = pipe.communicate(passwd)
+    os.close(fd)
 
     if pipe.returncode != 0:
         die("gpg returned non-zero")
-
-    # XXX: technically there is a race here, as there is a fraction of a
-    # microsecond where the file is not mode 0400, however, since the
-    # file is encrypted, this is not a huge problem.
-    # TODO: capture stdoutof gpg, create file, chmod file, write file
-    os.chmod(out_file, stat.S_IRUSR)
 
 def cmd_ls(cfg, *args):
     for e in os.listdir(CRYPTO_DIR):
