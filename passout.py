@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.3
+#!/usr/bin/env python3.4
 import sys, os, logging, io, getpass, subprocess, stat
 
 PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
