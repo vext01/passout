@@ -26,7 +26,7 @@ def check_dirs():
     """ Check that the passout dot dir is there and looking right """
     dirs = [ PASSOUT_DIR, CRYPTO_DIR ]
     for d in dirs:
-        if not os.path.lexists(d):
+        if not os.path.exists(d):
             logging.info("Creating '%s'" % d)
             os.mkdir(d)
         if not os.path.isdir(d):
@@ -38,7 +38,7 @@ def get_pass_file(passname):
 def get_password(cfg, pwname):
     pw_file = get_pass_file(pwname)
 
-    if not os.path.lexists(pw_file):
+    if not os.path.exists(pw_file):
         die("No password called '%s'" % pwname)
 
     # Have not found a way for this to work with mutt+msmtp without using
@@ -70,7 +70,7 @@ def get_config():
             "xclip" :   "xclip",
     }
 
-    if not os.path.lexists(CONFIG_FILE):
+    if not os.path.exists(CONFIG_FILE):
         die("Please create the config file '%s'" % CONFIG_FILE)
 
     with open(CONFIG_FILE, "r") as fh:
@@ -101,7 +101,7 @@ def cmd_add(cfg, *args):
     (pwname, ) = args
 
     out_file = get_pass_file(pwname)
-    if os.path.lexists(out_file):
+    if os.path.exists(out_file):
         die("A password called '%s' already exists" % pwname)
 
     passwd = getpass.getpass()
@@ -131,7 +131,7 @@ def cmd_rm(cfg, *args):
 
     pw_file = get_pass_file(pwname)
 
-    if not os.path.lexists(pw_file):
+    if not os.path.exists(pw_file):
         die("No password named '%s'" % pwname)
 
     os.unlink(pw_file)
