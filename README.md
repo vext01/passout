@@ -44,7 +44,7 @@ mkdir ~/.passout && echo "gpg=<your_gpg_binary>\nid=<your_gpg_id>\n" > \
 
 Where `<your_gpg_binary>` is the path to the gpg binary you want to use (I
 recommend using version 2) and `<your_gpg_id>` is the email address
-associate with the gpg key you want to use with PassOut.
+associated with the gpg key you want to use with PassOut.
 
 Now add your passwords, e.g. to add a password named 'my-email':
 
