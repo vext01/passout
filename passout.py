@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python2.7
 import sys, os, logging, io, getpass, subprocess, stat
 
 PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
@@ -15,6 +15,7 @@ def usage(retcode):
     print("  stdout <pass_name>")
     print("  clip <pass_name>")
     print("  printconfig")
+    print("  tray")
     sys.exit(retcode)
 
 def die(msg):
@@ -97,6 +98,24 @@ def get_config():
 
     return cfg
 
+def put_password_into_clipboard(cfg, pwname):
+    passwd = get_password(cfg, pwname)
+
+    try:
+        pipe = subprocess.Popen(cfg["xclip"],
+                stdin=subprocess.PIPE, universal_newlines=True)
+    except FileNotFoundError:
+        die("Xclip utility '%s' not found" % cfg["xclip"])
+
+    (out, err) = pipe.communicate(passwd)
+
+    if pipe.returncode != 0:
+        die("'%s' returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
+                (cfg["xclip"], out, err))
+
+def get_all_password_names():
+    return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg") ]
+
 def cmd_add(cfg, *args):
     (pwname, ) = args
 
@@ -122,9 +141,8 @@ def cmd_add(cfg, *args):
         die("gpg returned non-zero")
 
 def cmd_ls(cfg, *args):
-    for e in os.listdir(CRYPTO_DIR):
-        if e.endswith(".gpg"):
-            print(e[:-4])
+    for p in sorted(get_all_password_names()):
+        print(p)
 
 def cmd_rm(cfg, *args):
     (pwname, ) = args
@@ -145,22 +163,14 @@ def cmd_clip(cfg, *args):
     """ Puts a password in the GUI clipboard """
 
     (pwname, ) = args
-    passwd = get_password(cfg, pwname)
-
-    try:
-        pipe = subprocess.Popen(cfg["xclip"],
-                stdin=subprocess.PIPE, universal_newlines=True)
-    except FileNotFoundError:
-        die("Xclip utility '%s' not found" % cfg["xclip"])
-
-    (out, err) = pipe.communicate(passwd)
-
-    if pipe.returncode != 0:
-        die("'%s' returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
-                (cfg["xclip"], out, err))
+    put_password_into_clipboard(cfg, pwname)
 
 def cmd_printconfig(cfg, *args):
     print(cfg)
+
+def cmd_tray(cfg, *args):
+    from tray import run_tray
+    run_tray(cfg)
 
 # Table of commands
 # command_name : (n_args, func)
@@ -171,6 +181,7 @@ CMD_TAB = {
     "stdout" :      (1, cmd_stdout),
     "clip" :        (1, cmd_clip),
     "printconfig" : (0, cmd_printconfig),
+    "tray" :        (0, cmd_tray),
 }
 def entrypoint():
     """ Execution begins here """
