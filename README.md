@@ -91,3 +91,7 @@ environment's system tray. Right click the icon and select a password name
 to have the password placed in the system clipboard.
 
 If someone knows how to integrate with gdm/kdm, please send a pull request.
+
+## License
+
+PassOut is distributed under the ISC license.
