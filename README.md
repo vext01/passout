@@ -54,7 +54,7 @@ passout.py add my-email
 ```
 
 You will be prompted for the password. The password will not echo. Passwords
-are stored GPG encrypted in `~/.pass/crypto_store`.
+are stored GPG encrypted in `~/.passout/crypto_store`.
 
 To retrieve a password to stdout:
 
