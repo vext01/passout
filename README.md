@@ -20,9 +20,10 @@ in Python 3. You can set it up in minutes.
 ## Dependencies
 
   * GPG.
-  * Python 3.
+  * Python 2.7 (3 may work also).
   * xclip (for clipboard support only).
   * A GUI pinentry program, e.g. `gtk-pinentry-2` (for X11 integration only).
+  * PyGTK (System tray integration only).
 
 ## Quick Start
 
@@ -84,5 +85,9 @@ Obviously tweaking paths for your platform. You will now only need to unlock
 the GPG key upon first use after X11 login, and then periodically when the
 `gpg-agent` cache expires. To tweak the expiration time, pass a
 `--max-cache-ttl` argument to `gpg-agent`.
+
+You can also run `passout.py tray` to place an icon in your desktop
+environment's system tray. Right click the icon and select a password name
+to have the password placed in the system clipboard.
 
 If someone knows how to integrate with gdm/kdm, please send a pull request.
