@@ -39,7 +39,7 @@ http://www.gnupg.org/gph/en/manual.html#AEN26
 Tell PassOut about your key:
 
 ```
-mkdir ~/.passout && echo "gpg=<your_gpg_binary>\nid=<your_gpg_id>\n" > \
+mkdir ~/.passout && echo -e "gpg=<your_gpg_binary>\nid=<your_gpg_id>\n" > \
 	~/.passout/passoutrc
 ```
 
