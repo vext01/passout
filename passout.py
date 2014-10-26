@@ -171,6 +171,8 @@ def cmd_add(cfg, *args):
             universal_newlines=True
         )
     except OSError:
+        os.close(fd)
+        os.unlink(out_file)
         die("GPG utility '%s' not found" % cfg["gpg"])
 
     (out, err) = pipe.communicate(passwd)
