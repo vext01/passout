@@ -14,11 +14,18 @@
 # OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import sys, os, logging, io, getpass, subprocess, stat
+import io
+import os
+import sys
+import stat
+import getpass
+import logging
+import subprocess
 
 PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
 CRYPTO_DIR = os.path.join(PASSOUT_DIR, "crytpo_store")
 CONFIG_FILE = os.path.join(PASSOUT_DIR, "passoutrc")
+
 
 def usage(retcode):
     """ Print usage and exit """
@@ -33,14 +40,16 @@ def usage(retcode):
     print("  tray")
     sys.exit(retcode)
 
+
 def die(msg):
     """ Exit with a failure message """
     logging.error(msg)
     sys.exit(666)
 
+
 def check_dirs():
     """ Check that the passout dot dir is there and looking right """
-    dirs = [ PASSOUT_DIR, CRYPTO_DIR ]
+    dirs = [PASSOUT_DIR, CRYPTO_DIR]
     for d in dirs:
         if not os.path.exists(d):
             logging.info("Creating '%s'" % d)
@@ -48,8 +57,10 @@ def check_dirs():
         if not os.path.isdir(d):
             die("'%s' is not a directory" % d)
 
+
 def get_pass_file(passname):
     return os.path.join(CRYPTO_DIR, passname) + ".gpg"
+
 
 def get_password(cfg, pwname):
     pw_file = get_pass_file(pwname)
@@ -62,10 +73,11 @@ def get_password(cfg, pwname):
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "--no-tty", "-d", pw_file)
 
     try:
-        pipe = subprocess.Popen(gpg_args,
-                stdin=sys.stdin, stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, universal_newlines=True)
-    except FileNotFoundError:
+        pipe = subprocess.Popen(
+            gpg_args, stdin=sys.stdin, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, universal_newlines=True
+        )
+    except OSError:
         die("GPG utility '%s' not found" % cfg["gpg"])
 
     (out, err) = pipe.communicate()
@@ -75,15 +87,16 @@ def get_password(cfg, pwname):
 
     return out
 
+
 # keys that can appear in the config file.
 def get_config():
     """ return a configuration (using config file if exists) """
 
     # default config
     cfg = {
-            "gpg" :     "gpg2",
-            "id" :      None,
-            "xclip" :   "xclip",
+        "gpg":    "gpg2",
+        "id":     None,
+        "xclip": "xclip",
     }
 
     if not os.path.exists(CONFIG_FILE):
@@ -99,13 +112,17 @@ def get_config():
 
             elems = line.split("=")
             if len(elems) != 2:
-                die("config file '%s': syntax error on line %d" %
-                        (CONFIG_FILE, line_no))
+                die(
+                    "config file '%s': syntax error on line %d" %
+                    (CONFIG_FILE, line_no)
+                )
             (key, val) = elems
 
             if key not in cfg.keys():
-                die("config file '%s': unknown key '%s' on line %d" %
-                        (CONFIG_FILE, key, line_no))
+                die(
+                    "config file '%s': unknown key '%s' on line %d" %
+                    (CONFIG_FILE, key, line_no)
+                )
             cfg[key] = val
 
     if not cfg["id"]:
@@ -113,23 +130,29 @@ def get_config():
 
     return cfg
 
+
 def put_password_into_clipboard(cfg, pwname):
     passwd = get_password(cfg, pwname)
 
     try:
-        pipe = subprocess.Popen(cfg["xclip"],
-                stdin=subprocess.PIPE, universal_newlines=True)
-    except FileNotFoundError:
+        pipe = subprocess.Popen(
+            cfg["xclip"], stdin=subprocess.PIPE, universal_newlines=True
+        )
+    except OSError:
         die("Xclip utility '%s' not found" % cfg["xclip"])
 
     (out, err) = pipe.communicate(passwd)
 
     if pipe.returncode != 0:
-        die("'%s' returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
-                (cfg["xclip"], out, err))
+        die(
+            "'%s' returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
+            (cfg["xclip"], out, err)
+        )
+
 
 def get_all_password_names():
-    return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg") ]
+    return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg")]
+
 
 def cmd_add(cfg, *args):
     (pwname, ) = args
@@ -143,10 +166,11 @@ def cmd_add(cfg, *args):
 
     fd = os.open(out_file, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR)
     try:
-        pipe = subprocess.Popen(gpg_args,
-                stdin=subprocess.PIPE, stdout=fd,
-                universal_newlines=True)
-    except FileNotFoundError:
+        pipe = subprocess.Popen(
+            gpg_args,  stdin=subprocess.PIPE, stdout=fd,
+            universal_newlines=True
+        )
+    except OSError:
         die("GPG utility '%s' not found" % cfg["gpg"])
 
     (out, err) = pipe.communicate(passwd)
@@ -155,9 +179,11 @@ def cmd_add(cfg, *args):
     if pipe.returncode != 0:
         die("gpg returned non-zero")
 
+
 def cmd_ls(cfg, *args):
     for p in sorted(get_all_password_names()):
         print(p)
+
 
 def cmd_rm(cfg, *args):
     (pwname, ) = args
@@ -169,10 +195,12 @@ def cmd_rm(cfg, *args):
 
     os.unlink(pw_file)
 
+
 def cmd_stdout(cfg, *args):
     """ Prints a password out of stdout (for use with, e.g. mutt) """
     (pwname, ) = args
     print(get_password(cfg, pwname))
+
 
 def cmd_clip(cfg, *args):
     """ Puts a password in the GUI clipboard """
@@ -180,24 +208,29 @@ def cmd_clip(cfg, *args):
     (pwname, ) = args
     put_password_into_clipboard(cfg, pwname)
 
+
 def cmd_printconfig(cfg, *args):
     print(cfg)
+
 
 def cmd_tray(cfg, *args):
     from tray import run_tray
     run_tray(cfg)
 
+
 # Table of commands
 # command_name : (n_args, func)
 CMD_TAB = {
-    "ls" :          (0, cmd_ls),
-    "add" :         (1, cmd_add),
-    "rm" :          (1, cmd_rm),
-    "stdout" :      (1, cmd_stdout),
-    "clip" :        (1, cmd_clip),
-    "printconfig" : (0, cmd_printconfig),
-    "tray" :        (0, cmd_tray),
+    "ls":          (0, cmd_ls),
+    "add":         (1, cmd_add),
+    "rm":          (1, cmd_rm),
+    "stdout":      (1, cmd_stdout),
+    "clip":        (1, cmd_clip),
+    "printconfig": (0, cmd_printconfig),
+    "tray":        (0, cmd_tray),
 }
+
+
 def entrypoint():
     """ Execution begins here """
 
