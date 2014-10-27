@@ -18,9 +18,11 @@ import io
 import os
 import sys
 import stat
+import random
 import getpass
 import logging
 import subprocess
+
 
 PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
 CRYPTO_DIR = os.path.join(PASSOUT_DIR, "crytpo_store")
@@ -33,6 +35,7 @@ def usage(retcode):
     print("Available commands:")
     print("  ls")
     print("  add <pass_name>")
+    print("  generate <pass_name> [password length]")
     print("  rm <pass_name>")
     print("  stdout <pass_name>")
     print("  clip <pass_name>")
@@ -157,29 +160,28 @@ def get_all_password_names():
 def cmd_add(cfg, *args):
     (pwname, ) = args
 
-    out_file = get_pass_file(pwname)
-    if os.path.exists(out_file):
-        die("A password called '%s' already exists" % pwname)
-
+    out_file = _get_pass_filename(pwname)
     passwd = getpass.getpass()
-    gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
 
-    fd = os.open(out_file, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR)
-    try:
-        pipe = subprocess.Popen(
-            gpg_args,  stdin=subprocess.PIPE, stdout=fd,
-            universal_newlines=True
-        )
-    except OSError:
-        os.close(fd)
-        os.unlink(out_file)
-        die("GPG utility '%s' not found" % cfg["gpg"])
+    _add_pasword(cfg, pwname, passwd, out_file)
 
-    (out, err) = pipe.communicate(passwd)
-    os.close(fd)
 
-    if pipe.returncode != 0:
-        die("gpg returned non-zero")
+def cmd_generate(cfg, *args):
+    pwname = args[0]
+    if len(args) > 1:
+        pass_len = int(args[1])
+    else:
+        pass_len = 20
+
+    out_file = _get_pass_filename(pwname)
+    urandom = random.SystemRandom()
+    possible_chars = [chr(i) for i in range(ord('!'), ord('~') + 1)]
+    passwd = ""
+
+    for i in range(pass_len):
+        passwd += urandom.choice(possible_chars)
+
+    _add_pasword(cfg, pwname, passwd, out_file)
 
 
 def cmd_ls(cfg, *args):
@@ -206,7 +208,6 @@ def cmd_stdout(cfg, *args):
 
 def cmd_clip(cfg, *args):
     """ Puts a password in the GUI clipboard """
-
     (pwname, ) = args
     put_password_into_clipboard(cfg, pwname)
 
@@ -220,16 +221,45 @@ def cmd_tray(cfg, *args):
     run_tray(cfg)
 
 
+def _add_pasword(cfg, pwname, passwd, out_file):
+    gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
+
+    fd = os.open(out_file, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR)
+    try:
+        pipe = subprocess.Popen(
+            gpg_args,  stdin=subprocess.PIPE, stdout=fd,
+            universal_newlines=True
+        )
+    except OSError:
+        os.close(fd)
+        os.unlink(out_file)
+        die("GPG utility '%s' not found" % cfg["gpg"])
+
+    (out, err) = pipe.communicate(passwd)
+    os.close(fd)
+
+    if pipe.returncode != 0:
+        die("gpg returned non-zero")
+
+
+def _get_pass_filename(pwname):
+    out_file = get_pass_file(pwname)
+    if os.path.exists(out_file):
+        die("A password called '%s' already exists" % pwname)
+    return out_file
+
+
 # Table of commands
-# command_name : (n_args, func)
+# command_name : (n_args, n_optional_args, func)
 CMD_TAB = {
-    "ls":          (0, cmd_ls),
-    "add":         (1, cmd_add),
-    "rm":          (1, cmd_rm),
-    "stdout":      (1, cmd_stdout),
-    "clip":        (1, cmd_clip),
-    "printconfig": (0, cmd_printconfig),
-    "tray":        (0, cmd_tray),
+    "ls":          (0, 0, cmd_ls),
+    "add":         (1, 0, cmd_add),
+    "rm":          (1, 0, cmd_rm),
+    "stdout":      (1, 0, cmd_stdout),
+    "clip":        (1, 0, cmd_clip),
+    "printconfig": (0, 0, cmd_printconfig),
+    "tray":        (0, 0, cmd_tray),
+    "generate":    (1, 1, cmd_generate),
 }
 
 
@@ -246,13 +276,13 @@ def entrypoint():
         usage(666)
 
     try:
-        (expect_n_args, func) = CMD_TAB[cmd]
+        (expect_n_args, optional_n_args, func) = CMD_TAB[cmd]
     except KeyError:
         die("Unknown command '%s'" % cmd)
         usage(666)
 
     n_args = len(sys.argv) - 2
-    if n_args != expect_n_args:
+    if n_args not in range(expect_n_args, expect_n_args + optional_n_args + 1):
         die("Wrong argument count for command '%s'" % cmd)
 
     func(cfg, *sys.argv[2:])

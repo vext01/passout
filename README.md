@@ -9,7 +9,7 @@ I use a lot of programs that require passwords, e.g. offlineimap/msmtp/...
 
  * Put them in clear text in a config file, e.g. `.netrc`.
  * Use a password manager such as gnome-keyring, pwsafe, keepassx, etc.
- 
+
 The former is obviously annoying. The latter works, but I found that these
 tools were either too heavyweight, or required me to type the master
 password every time I needed to access the password store.
@@ -55,6 +55,14 @@ passout.py add my-email
 
 You will be prompted for the password. The password will not echo. Passwords
 are stored GPG encrypted in `~/.passout/crypto_store`.
+
+Generate a random password (default length of 20)
+
+```
+passout.py generate my-email
+or
+passout.py generate my-email 50
+```
 
 To retrieve a password to stdout:
 
