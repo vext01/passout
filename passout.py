@@ -35,7 +35,7 @@ def usage(retcode):
     print("Available commands:")
     print("  ls")
     print("  add <pass_name>")
-    print("  generate <pass_name> [password length]")
+    print("  gen <pass_name> [password length]")
     print("  rm <pass_name>")
     print("  stdout <pass_name>")
     print("  clip <pass_name>")
@@ -166,7 +166,7 @@ def cmd_add(cfg, *args):
     _add_pasword(cfg, pwname, passwd, out_file)
 
 
-def cmd_generate(cfg, *args):
+def cmd_gen(cfg, *args):
     pwname = args[0]
     if len(args) > 1:
         pass_len = int(args[1])
@@ -259,7 +259,7 @@ CMD_TAB = {
     "clip":        (1, 0, cmd_clip),
     "printconfig": (0, 0, cmd_printconfig),
     "tray":        (0, 0, cmd_tray),
-    "generate":    (1, 1, cmd_generate),
+    "gen":         (1, 1, cmd_gen),
 }
 
 
