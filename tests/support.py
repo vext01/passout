@@ -43,20 +43,6 @@ def _make_key(gpg):
     gpg_cmd("--batch", "--gen-key", GPG_TEMPLATE)
 
 
-def _get_key_id(gpg):
-    gpg_cmd = sh.Command(gpg)
-    out = gpg_cmd("-K").stdout
-    for line in out.splitlines():
-        match = re.match("^sec +1024R/(.*) [0-9]{4}-[0-9]{2}-[0-9]{2}$", line)
-        if match:
-            break
-
-    if not match or len(match.groups()) != 1:
-        raise TestError("Failed to extract GPG id for tests")
-
-    return match.groups(1)
-
-
 def _remove_passout_dir():
     if os.path.exists(PASSOUT_DIR):
         shutil.rmtree(PASSOUT_DIR)
@@ -81,8 +67,7 @@ def passout(request):
     if not os.path.exists(GPG_DIR):
         _make_key(gpg)
 
-    gpg_id = _get_key_id(gpg)
-    _make_fresh_passout_dir(gpg_id)
+    _make_fresh_passout_dir(gpg)
 
     def finalise():
         _remove_passout_dir()
