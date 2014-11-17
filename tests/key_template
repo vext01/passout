@@ -1,0 +1,9 @@
+Key-Type: default
+Key-Length: 1024
+Key-Usage: encrypt
+Subkey-Type: default
+Subkey-Length: 1024
+Subkey-Usage: encrypt
+Name-Real: PassOut Tests
+Name-Comment: Auto-generatedkey for the test suite.
+Name-Email: test@localhost
