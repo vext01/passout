@@ -21,9 +21,12 @@ import getpass
 import logging
 import subprocess
 
-PASSOUT_DIR = os.path.join(os.environ["HOME"], ".passout")
-CRYPTO_DIR = os.path.join(PASSOUT_DIR, "crytpo_store")
-CONFIG_FILE = os.path.join(PASSOUT_DIR, "passoutrc")
+PASSOUT_HOME = os.environ.get("PASSOUT_HOME")
+if not PASSOUT_HOME:
+    PASSOUT_HOME = os.path.join(os.environ["HOME"], ".passout")
+
+CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crytpo_store")
+CONFIG_FILE = os.path.join(PASSOUT_HOME, "passoutrc")
 
 
 def usage(retcode):
@@ -48,7 +51,7 @@ def die(msg):
 
 def check_dirs():
     """ Check that the passout dot dir is there and looking right """
-    dirs = [PASSOUT_DIR, CRYPTO_DIR]
+    dirs = [PASSOUT_HOME, CRYPTO_DIR]
     for d in dirs:
         if not os.path.exists(d):
             logging.info("Creating '%s'" % d)
