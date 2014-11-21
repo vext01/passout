@@ -43,6 +43,11 @@ def _remove_passout_dir():
         shutil.rmtree(PASSOUT_DIR)
 
 
+def _remove_gpg_dir():
+    if os.path.exists(GPG_DIR):
+        shutil.rmtree(GPG_DIR)
+
+
 def _make_fresh_passout_dir(gpg):
     _remove_passout_dir()
 
@@ -67,6 +72,7 @@ class PexpectTest(object):
 
         def finalise():
             _remove_passout_dir()
+            _remove_gpg_dir()
 
         request.addfinalizer(finalise)
 
