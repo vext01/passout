@@ -2,7 +2,6 @@ from distutils.spawn import find_executable
 
 import pytest
 import os
-import re
 import uuid
 import shutil
 
@@ -53,32 +52,32 @@ def _make_fresh_passout_dir(gpg):
         config.write("id=%s\ngpg=%s\n" % (GPG_ID, gpg))
 
 
-@pytest.fixture(autouse=True)
-def passout(request):
-    """Fixture implicitely run once for each test.
+class PexpectTest(object):
+    @pytest.fixture(autouse=True)
+    def passout(self, request):
+        """Fixture implicitely run once for each test.
 
-    Creates a fresh passout setup ready for testing. This includes
-    making a gpg key if one does not exist in the test dir."""
+        Creates a fresh passout setup ready for testing. This includes
+        making a gpg key if one does not exist in the test dir."""
 
-    gpg = _find_gpg()
-    if not os.path.exists(GPG_DIR):
-        _make_key(gpg)
+        gpg = _find_gpg()
+        if not os.path.exists(GPG_DIR):
+            _make_key(gpg)
 
-    _make_fresh_passout_dir(gpg)
+        _make_fresh_passout_dir(gpg)
 
-    def finalise():
-        _remove_passout_dir()
+        def finalise():
+            _remove_passout_dir()
 
-    request.addfinalizer(finalise)
+        request.addfinalizer(finalise)
 
+    @pytest.fixture
+    def _uuid_hex(self):
+        """Generates a random password name or password name for tests"""
+        return uuid.uuid1().hex
 
-@pytest.fixture
-def pw_name():
-    return uuid.uuid1().hex
+    rand_pw = _uuid_hex
+    rand_pwname = _uuid_hex
 
-
-rand_pw = pw_name
-
-
-def run_passout(*args):
-    return pexpect.spawn("%s %s" % (PASSOUT, " ".join(args)))
+    def run_passout(self, *args):
+        return pexpect.spawn("%s %s" % (PASSOUT, " ".join(args)))

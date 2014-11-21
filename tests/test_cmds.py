@@ -1,19 +1,16 @@
 import os
 import pexpect
 
-from support import PASSOUT_DIR, GPG_DIR
-os.environ["PASSOUT_HOME"] = PASSOUT_DIR
-os.environ["GNUPGHOME"] = GPG_DIR
+import support
 
-# linters will complain but you really do need these.
-from support import pw_name, rand_pw, run_passout,  passout
+class TestCmds(support.PexpectTest):
 
-def test_basic_add_and_stdout(pw_name, rand_pw):
-    child1 = run_passout("add", pw_name)
-    child1.expect("Password: ")
-    child1.sendline(rand_pw)
-    child1.expect(pexpect.EOF)
+    def test_basic_add_and_stdout(self, rand_pwname, rand_pw):
+        child1 = self.run_passout("add", rand_pwname)
+        child1.expect("Password: ")
+        child1.sendline(rand_pw)
+        child1.expect(pexpect.EOF)
 
-    child2 = run_passout("stdout", pw_name)
-    child2.expect(rand_pw)
-    child2.expect(pexpect.EOF)
+        child2 = self.run_passout("stdout", rand_pwname)
+        child2.expect(rand_pw)
+        child2.expect(pexpect.EOF)
