@@ -25,6 +25,10 @@ in Python 3. You can set it up in minutes.
   * A GUI pinentry program, e.g. `gtk-pinentry-2` (for X11 integration only).
   * PyGTK (System tray integration only).
 
+For developers:
+
+  * pytest
+
 ## Quick Start
 
 Generate a GPG key (if you don't yet have one):
@@ -91,6 +95,14 @@ environment's system tray. Right click the icon and select a password name
 to have the password placed in the system clipboard.
 
 If someone knows how to integrate with gdm/kdm, please send a pull request.
+
+## Tests
+
+To run the test suite, from the source directory run:
+
+```
+py.test tests/
+```
 
 ## License
 
