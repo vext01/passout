@@ -1,12 +1,12 @@
 import os
 import pexpect
 
+from support import PASSOUT_DIR, GPG_DIR
+os.environ["PASSOUT_HOME"] = PASSOUT_DIR
+os.environ["GNUPGHOME"] = GPG_DIR
+
 # linters will complain but you really do need these.
-from support import pw_name, rand_pw, run_passout, TEST_DIR, passout
-
-# XXX I hate this.
-os.environ["HOME"] = TEST_DIR
-
+from support import pw_name, rand_pw, run_passout,  passout
 
 def test_basic_add_and_stdout(pw_name, rand_pw):
     child1 = run_passout("add", pw_name)

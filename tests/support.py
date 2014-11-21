@@ -9,20 +9,18 @@ import shutil
 import pexpect
 import sh
 
-# setup a fake home to put gpg and passout stuff in
-# XXX dangerous, add an environment variable for this purpose.
-# XXX using $HOME also means PYTHON doesn't see ~/.local after
-# XXX we change $HOME.
+# Trick PassOut and GPG into looking in the test dir
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-os.environ["HOME"] = TEST_DIR
+PASSOUT_DIR = os.path.join(TEST_DIR, ".passout")
+GPG_DIR = os.path.join(TEST_DIR, ".gnupg")
+os.environ["PASSOUT_HOME"] = PASSOUT_DIR
+os.environ["GNUPGHOME"] = GPG_DIR
 
 GPGS = ["gpg2", "gpg"]
 GPG_TEMPLATE = os.path.join(TEST_DIR, "key_template")
-GPG_DIR = os.path.join(TEST_DIR, ".gnupg")
 GPG_ID = "test@localhost"
 
 PASSOUT = os.path.join(TEST_DIR, "..", "passout.py")
-PASSOUT_DIR = os.path.join(TEST_DIR, ".passout")
 PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passoutrc")
 
 
