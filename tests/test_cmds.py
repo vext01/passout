@@ -1,7 +1,7 @@
-import os
 import pexpect
 
 import support
+
 
 class TestCmds(support.PexpectTest):
 
