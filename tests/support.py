@@ -1,11 +1,10 @@
+import os
+import shutil
+import uuid
 from distutils.spawn import find_executable
 
-import pytest
-import os
-import uuid
-import shutil
-
 import pexpect
+import pytest
 import sh
 
 # Trick PassOut and GPG into looking in the test dir
