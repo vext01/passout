@@ -2,10 +2,10 @@ import os
 import pexpect
 
 # linters will complain but you really do need these.
-from support import pw_name, rand_pw, run_passout, SCRIPT_DIR, passout
+from support import pw_name, rand_pw, run_passout, TEST_DIR, passout
 
 # XXX I hate this.
-os.environ["HOME"] = SCRIPT_DIR
+os.environ["HOME"] = TEST_DIR
 
 
 def test_basic_add_and_stdout(pw_name, rand_pw):

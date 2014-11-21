@@ -13,17 +13,16 @@ import sh
 # XXX dangerous, add an environment variable for this purpose.
 # XXX using $HOME also means PYTHON doesn't see ~/.local after
 # XXX we change $HOME.
-SCRIPT_PATH = os.path.abspath(__file__)
-SCRIPT_DIR = os.path.dirname(SCRIPT_PATH)
-os.environ["HOME"] = SCRIPT_DIR
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+os.environ["HOME"] = TEST_DIR
 
 GPGS = ["gpg2", "gpg"]
-GPG_TEMPLATE = os.path.join(SCRIPT_DIR, "key_template")
-GPG_DIR = os.path.join(SCRIPT_DIR, ".gnupg")
+GPG_TEMPLATE = os.path.join(TEST_DIR, "key_template")
+GPG_DIR = os.path.join(TEST_DIR, ".gnupg")
 GPG_ID = "test@localhost"
 
-PASSOUT = os.path.join(SCRIPT_DIR, "..", "passout.py")
-PASSOUT_DIR = os.path.join(SCRIPT_DIR, ".passout")
+PASSOUT = os.path.join(TEST_DIR, "..", "passout.py")
+PASSOUT_DIR = os.path.join(TEST_DIR, ".passout")
 PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passoutrc")
 
 
