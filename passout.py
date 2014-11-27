@@ -19,6 +19,7 @@ import sys
 import stat
 import getpass
 import logging
+import argparse
 import subprocess
 
 PASSOUT_HOME = os.environ.get("PASSOUT_HOME")
@@ -27,20 +28,6 @@ if not PASSOUT_HOME:
 
 CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crytpo_store")
 CONFIG_FILE = os.path.join(PASSOUT_HOME, "passoutrc")
-
-
-def usage(retcode):
-    """ Print usage and exit """
-    print("Usage: passout.py <command> <args>\n")
-    print("Available commands:")
-    print("  ls")
-    print("  add <pass_name>")
-    print("  rm <pass_name>")
-    print("  stdout <pass_name>")
-    print("  clip <pass_name>")
-    print("  printconfig")
-    print("  tray")
-    sys.exit(retcode)
 
 
 def die(msg):
@@ -156,9 +143,7 @@ def get_all_password_names():
     return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg")]
 
 
-def cmd_add(cfg, *args):
-    (pwname, ) = args
-
+def cmd_add(cfg, pwname):
     out_file = get_pass_file(pwname)
     if os.path.exists(out_file):
         die("A password called '%s' already exists" % pwname)
@@ -184,14 +169,12 @@ def cmd_add(cfg, *args):
         die("gpg returned non-zero")
 
 
-def cmd_ls(cfg, *args):
+def cmd_ls(cfg):
     for p in sorted(get_all_password_names()):
         print(p)
 
 
-def cmd_rm(cfg, *args):
-    (pwname, ) = args
-
+def cmd_rm(cfg, pwname):
     pw_file = get_pass_file(pwname)
 
     if not os.path.exists(pw_file):
@@ -200,64 +183,82 @@ def cmd_rm(cfg, *args):
     os.unlink(pw_file)
 
 
-def cmd_stdout(cfg, *args):
+def cmd_stdout(cfg, pwname):
     """ Prints a password out of stdout (for use with, e.g. mutt) """
-    (pwname, ) = args
     print(get_password(cfg, pwname))
 
 
-def cmd_clip(cfg, *args):
+def cmd_clip(cfg, pwname):
     """ Puts a password in the GUI clipboard """
-
-    (pwname, ) = args
     put_password_into_clipboard(cfg, pwname)
 
 
-def cmd_printconfig(cfg, *args):
+def cmd_printconfig(cfg):
     print(cfg)
 
 
-def cmd_tray(cfg, *args):
+def cmd_tray(cfg):
     from tray import run_tray
     run_tray(cfg)
 
 
-# Table of commands
-# command_name : (n_args, func)
-CMD_TAB = {
-    "ls":          (0, cmd_ls),
-    "add":         (1, cmd_add),
-    "rm":          (1, cmd_rm),
-    "stdout":      (1, cmd_stdout),
-    "clip":        (1, cmd_clip),
-    "printconfig": (0, cmd_printconfig),
-    "tray":        (0, cmd_tray),
-}
+def _entrypoint(args):
+    func_args = [get_config()]
+
+    if hasattr(args, "pass_name"):
+        func_args.append(args.pass_name)
+
+    args.func(*func_args)
 
 
-def entrypoint():
+def main():
     """ Execution begins here """
 
     logging.basicConfig(level=logging.INFO)
     check_dirs()
-    cfg = get_config()
+    pass_name_parser = []
 
-    try:
-        cmd = sys.argv[1]
-    except IndexError:
-        usage(666)
+    parser = argparse.ArgumentParser(description="Simple password manager built on gpg")
+    subparsers = parser.add_subparsers(title="command")
 
-    try:
-        (expect_n_args, func) = CMD_TAB[cmd]
-    except KeyError:
-        die("Unknown command '%s'" % cmd)
-        usage(666)
+    # ls
+    ls = subparsers.add_parser("ls", help="List passwords stored")
+    ls.set_defaults(func=cmd_ls)
 
-    n_args = len(sys.argv) - 2
-    if n_args != expect_n_args:
-        die("Wrong argument count for command '%s'" % cmd)
+    # add
+    add = subparsers.add_parser("add", help="Add a new password")
+    add.set_defaults(func=cmd_add)
+    pass_name_parser.append(add)
 
-    func(cfg, *sys.argv[2:])
+    # rm
+    rm = subparsers.add_parser("rm", help="Remove a stored password")
+    rm.set_defaults(func=cmd_rm)
+    pass_name_parser.append(rm)
+
+    # stdout
+    stdout = subparsers.add_parser("stdout", help="Print password to stdout")
+    stdout.set_defaults(func=cmd_rm)
+    pass_name_parser.append(stdout)
+
+    # clip
+    clip = subparsers.add_parser("clip", help="Put the password in the X buffer")
+    clip.set_defaults(func=cmd_clip)
+    pass_name_parser.append(clip)
+
+    # config
+    config = subparsers.add_parser("config", help="Print the current passout configuration")
+    config.set_defaults(func=cmd_printconfig)
+
+    # tray
+    tray = subparsers.add_parser("tray", help="Start the GTK tray icon")
+    tray.set_defaults(func=cmd_tray)
+
+    for p in pass_name_parser:
+        p.add_argument("pass_name", help="Name of password")
+
+    args = parser.parse_args()
+    _entrypoint(args)
 
 if __name__ == "__main__":
-    entrypoint()
+    main()
+
