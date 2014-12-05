@@ -149,6 +149,7 @@ def add_password(cfg, pw_name):
     if os.path.exists(out_file):
         raise PassOutError("A password called '%s' already exists" % pw_name)
 
+    # XXX library should not be interactive! Pass in the password (?)
     passwd = getpass.getpass()
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
 
