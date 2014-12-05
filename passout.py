@@ -18,10 +18,9 @@ Command line client to PassOut.
 """
 
 import sys
-import logging
 
 import passout
-from passout import tray
+from passout import tray, PassOutError
 
 
 def usage(retcode):
@@ -37,12 +36,6 @@ def usage(retcode):
     print("  printconfig")
     print("  tray")
     sys.exit(retcode)
-
-
-def die(msg):
-    """ Exit with a failure message """
-    logging.error(msg)
-    sys.exit(666)
 
 
 def cmd_add(cfg, *args):
@@ -96,7 +89,6 @@ CMD_TAB = {
 def entrypoint():
     """ Execution begins here """
 
-    logging.basicConfig(level=logging.INFO)
     cfg = passout.get_config()
 
     try:
@@ -107,12 +99,12 @@ def entrypoint():
     try:
         (expect_n_args, func) = CMD_TAB[cmd]
     except KeyError:
-        die("Unknown command '%s'" % cmd)
+        raise PassOutError("Unknown command '%s'" % cmd)
         usage(666)
 
     n_args = len(sys.argv) - 2
     if n_args != expect_n_args:
-        die("Wrong argument count for command '%s'" % cmd)
+        raise PassOutError("Wrong argument count for command '%s'" % cmd)
 
     func(cfg, *sys.argv[2:])
 

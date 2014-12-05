@@ -21,7 +21,6 @@ import os
 import sys
 import stat
 import getpass
-import logging
 import subprocess
 
 PASSOUT_HOME = os.environ.get("PASSOUT_HOME")
@@ -32,12 +31,8 @@ CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crytpo_store")
 CONFIG_FILE = os.path.join(PASSOUT_HOME, "passoutrc")
 
 
-# XXX this needs to go.
-# The library should raise, not print and die.
-def die(msg):
-    """ Exit with a failure message """
-    logging.error(msg)
-    sys.exit(666)
+class PassOutError(Exception):
+    pass
 
 
 def _check_dirs():
@@ -45,10 +40,9 @@ def _check_dirs():
     dirs = [PASSOUT_HOME, CRYPTO_DIR]
     for d in dirs:
         if not os.path.exists(d):
-            logging.info("Creating '%s'" % d)
             os.mkdir(d)
         if not os.path.isdir(d):
-            die("'%s' is not a directory" % d)
+            raise PassOutError("'%s' is not a directory" % d)
 
 
 def _get_pass_file(passname):
@@ -62,7 +56,7 @@ def get_password(cfg, pwname):
     pw_file = _get_pass_file(pwname)
 
     if not os.path.exists(pw_file):
-        die("No password called '%s'" % pwname)
+        raise PassOutError("No password called '%s'" % pwname)
 
     # Have not found a way for this to work with mutt+msmtp without using
     # a GUI pinentry. /dev/tty not configured. Annoying XXX
@@ -74,12 +68,13 @@ def get_password(cfg, pwname):
             stderr=subprocess.PIPE, universal_newlines=True
         )
     except OSError:
-        die("GPG utility '%s' not found" % cfg["gpg"])
+        raise PassOutError("GPG utility '%s' not found" % cfg["gpg"])
 
     (out, err) = pipe.communicate()
 
     if pipe.returncode != 0:
-        die("gpg returned non-zero\nSTDOUT: %s\nSTDERR: %s" % (out, err))
+        raise PassOutError("gpg returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
+                           (out, err))
 
     return out
 
@@ -95,7 +90,7 @@ def get_config():
     }
 
     if not os.path.exists(CONFIG_FILE):
-        die("Please create the config file '%s'" % CONFIG_FILE)
+        raise PassOutError("Please create the config file '%s'" % CONFIG_FILE)
 
     with open(CONFIG_FILE, "r") as fh:
         line_no = 0
@@ -107,21 +102,21 @@ def get_config():
 
             elems = line.split("=")
             if len(elems) != 2:
-                die(
+                raise PassOutError(
                     "config file '%s': syntax error on line %d" %
                     (CONFIG_FILE, line_no)
                 )
             (key, val) = elems
 
             if key not in cfg.keys():
-                die(
+                raise PassOutError(
                     "config file '%s': unknown key '%s' on line %d" %
                     (CONFIG_FILE, key, line_no)
                 )
             cfg[key] = val
 
     if not cfg["id"]:
-        die("please set 'id=<email>' (your gpg id) in the '%s'" % CONFIG_FILE)
+        raise PassOutError("No 'id' in %s" % CONFIG_FILE)
 
     return cfg
 
@@ -134,12 +129,12 @@ def load_clipboard(cfg, pwname):
             cfg["xclip"], stdin=subprocess.PIPE, universal_newlines=True
         )
     except OSError:
-        die("Xclip utility '%s' not found" % cfg["xclip"])
+        raise PassOutError("Xclip utility '%s' not found" % cfg["xclip"])
 
     (out, err) = pipe.communicate(passwd)
 
     if pipe.returncode != 0:
-        die(
+        raise PassOutError(
             "'%s' returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
             (cfg["xclip"], out, err)
         )
@@ -152,7 +147,7 @@ def get_password_names():
 def add_password(cfg, pw_name):
     out_file = _get_pass_file(pw_name)
     if os.path.exists(out_file):
-        die("A password called '%s' already exists" % pw_name)
+        raise PassOutError("A password called '%s' already exists" % pw_name)
 
     passwd = getpass.getpass()
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
@@ -166,13 +161,13 @@ def add_password(cfg, pw_name):
     except OSError:
         os.close(fd)
         os.unlink(out_file)
-        die("GPG utility '%s' not found" % cfg["gpg"])
+        raise PassOutError("GPG utility '%s' not found" % cfg["gpg"])
 
     (out, err) = pipe.communicate(passwd)
     os.close(fd)
 
     if pipe.returncode != 0:
-        die("gpg returned non-zero")
+        raise PassOutError("gpg returned non-zero")
 
 
 def remove_password(cfg, pw_name):
@@ -180,7 +175,7 @@ def remove_password(cfg, pw_name):
     pw_file = _get_pass_file(pw_name)
 
     if not os.path.exists(pw_file):
-        die("No password named '%s'" % pw_name)
+        raise PassOutError("No password named '%s'" % pw_name)
 
     os.unlink(pw_file)
 

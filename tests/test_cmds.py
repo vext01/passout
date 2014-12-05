@@ -50,8 +50,8 @@ class TestCmds(support.PexpectTest):
         child1.expect_exact(pexpect.EOF)
 
         child2 = self.run_passout("add", rand_pwname)
-        child2.expect_exact(
-            "ERROR:root:A password called '%s' already exists" % rand_pwname)
+        child2.expect(
+            "A password called '%s' already exists" % rand_pwname)
         child2.expect_exact(pexpect.EOF)
 
     def test_rm(self, rand_pwname, rand_pw):
@@ -86,7 +86,7 @@ class TestCmds(support.PexpectTest):
     def test_rm_nonexisting_pw(self, rand_pwname):
         child1 = self.run_passout("rm", rand_pwname)
         child1.expect_exact(
-            "ERROR:root:No password named '%s'" % rand_pwname)
+            "No password named '%s'" % rand_pwname)
         child1.expect_exact(pexpect.EOF)
 
     # XXX Try to add a password under a non-existent GPG id. Should fail.
