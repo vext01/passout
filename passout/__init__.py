@@ -126,7 +126,7 @@ def get_config():
     return cfg
 
 
-def put_password_into_clipboard(cfg, pwname):
+def load_clipboard(cfg, pwname):
     passwd = get_password(cfg, pwname)
 
     try:
@@ -145,7 +145,7 @@ def put_password_into_clipboard(cfg, pwname):
         )
 
 
-def get_all_password_names():
+def get_password_names():
     return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg")]
 
 

@@ -17,14 +17,11 @@
 Command line client to PassOut.
 """
 
-import os
 import sys
-import stat
-import getpass
 import logging
-import subprocess
 
 import passout
+
 
 def usage(retcode):
     """ Print usage and exit """
@@ -53,7 +50,7 @@ def cmd_add(cfg, *args):
 
 
 def cmd_ls(cfg, *args):
-    for p in sorted(passout.get_all_password_names()):
+    for p in sorted(passout.get_password_names()):
         print(p)
 
 
@@ -71,7 +68,7 @@ def cmd_stdout(cfg, *args):
 def cmd_clip(cfg, *args):
     """ Puts a password in the GUI clipboard """
     (pw_name, ) = args
-    passout.put_password_into_clipboard(cfg, pw_name)
+    passout.load_clipboard(cfg, pw_name)
 
 
 def cmd_printconfig(cfg, *args):
