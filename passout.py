@@ -157,11 +157,14 @@ def get_all_password_names():
 
 
 def cmd_add(cfg, *args):
-    (pwname, ) = args
+    (pw_name, ) = args
+    add_password(cfg, pw_name)
 
-    out_file = get_pass_file(pwname)
+
+def add_password(cfg, pw_name):
+    out_file = get_pass_file(pw_name)
     if os.path.exists(out_file):
-        die("A password called '%s' already exists" % pwname)
+        die("A password called '%s' already exists" % pw_name)
 
     passwd = getpass.getpass()
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
@@ -190,27 +193,30 @@ def cmd_ls(cfg, *args):
 
 
 def cmd_rm(cfg, *args):
-    (pwname, ) = args
+    (pw_name, ) = args
+    remove_password(cfg, pw_name)
 
-    pw_file = get_pass_file(pwname)
+
+def remove_password(cfg, pw_name):
+
+    pw_file = get_pass_file(pw_name)
 
     if not os.path.exists(pw_file):
-        die("No password named '%s'" % pwname)
+        die("No password named '%s'" % pw_name)
 
     os.unlink(pw_file)
 
 
 def cmd_stdout(cfg, *args):
     """ Prints a password out of stdout (for use with, e.g. mutt) """
-    (pwname, ) = args
-    print(get_password(cfg, pwname))
+    (pw_name, ) = args
+    print(get_password(cfg, pw_name))
 
 
 def cmd_clip(cfg, *args):
     """ Puts a password in the GUI clipboard """
-
-    (pwname, ) = args
-    put_password_into_clipboard(cfg, pwname)
+    (pw_name, ) = args
+    put_password_into_clipboard(cfg, pw_name)
 
 
 def cmd_printconfig(cfg, *args):
