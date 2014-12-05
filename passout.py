@@ -21,6 +21,7 @@ import sys
 import logging
 
 import passout
+from passout import tray
 
 
 def usage(retcode):
@@ -76,7 +77,7 @@ def cmd_printconfig(cfg, *args):
 
 
 def cmd_tray(cfg, *args):
-    passout.tray.run_tray(cfg)
+    tray.run_tray(cfg)
 
 
 # Table of commands
