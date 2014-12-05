@@ -17,6 +17,7 @@ try:
 except ImportError:
     print("No GTK support for Python found, cannot run tray")
 
+
 class PassoutSysTrayApp(object):
     def __init__(self, cfg):
         self.cfg = cfg
@@ -26,7 +27,7 @@ class PassoutSysTrayApp(object):
         self.tray.set_from_stock(gtk.STOCK_DIALOG_AUTHENTICATION)
         self.tray.connect('popup-menu', self.show_menu)
         self.tray.set_tooltip("PassOut")
-        self.tray.set_visible (True)
+        self.tray.set_visible(True)
 
     def clip_password(self, item):
         pwname = item.get_label()
@@ -45,7 +46,7 @@ class PassoutSysTrayApp(object):
             item.connect('activate', self.clip_password)
 
         self.menu.popup(None, None, gtk.status_icon_position_menu,
-                button, time, self.tray)
+                        button, time, self.tray)
 
         sep = gtk.SeparatorMenuItem()
         sep.show()
@@ -58,7 +59,8 @@ class PassoutSysTrayApp(object):
         exit.connect('activate', gtk.main_quit)
 
         self.menu.popup(None, None, gtk.status_icon_position_menu,
-                button, time, self.tray)
+                        button, time, self.tray)
+
 
 def run_tray(cfg):
     PassoutSysTrayApp(cfg)
