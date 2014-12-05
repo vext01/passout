@@ -40,7 +40,7 @@ def die(msg):
     sys.exit(666)
 
 
-def check_dirs():
+def _check_dirs():
     """ Check that the passout dot dir is there and looking right """
     dirs = [PASSOUT_HOME, CRYPTO_DIR]
     for d in dirs:
@@ -51,12 +51,15 @@ def check_dirs():
             die("'%s' is not a directory" % d)
 
 
-def get_pass_file(passname):
+def _get_pass_file(passname):
     return os.path.join(CRYPTO_DIR, passname) + ".gpg"
 
 
+# //////// Exposed API functions below //////////////
+
+
 def get_password(cfg, pwname):
-    pw_file = get_pass_file(pwname)
+    pw_file = _get_pass_file(pwname)
 
     if not os.path.exists(pw_file):
         die("No password called '%s'" % pwname)
@@ -81,7 +84,6 @@ def get_password(cfg, pwname):
     return out
 
 
-# keys that can appear in the config file.
 def get_config():
     """ return a configuration (using config file if exists) """
 
@@ -148,7 +150,7 @@ def get_all_password_names():
 
 
 def add_password(cfg, pw_name):
-    out_file = get_pass_file(pw_name)
+    out_file = _get_pass_file(pw_name)
     if os.path.exists(out_file):
         die("A password called '%s' already exists" % pw_name)
 
@@ -175,13 +177,13 @@ def add_password(cfg, pw_name):
 
 def remove_password(cfg, pw_name):
 
-    pw_file = get_pass_file(pw_name)
+    pw_file = _get_pass_file(pw_name)
 
     if not os.path.exists(pw_file):
         die("No password named '%s'" % pw_name)
 
     os.unlink(pw_file)
 
+# /////////// Import time actions /////////////
 
-# At importtime, we ensure that everything exists.
-check_dirs()
+_check_dirs()
