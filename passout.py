@@ -13,100 +13,96 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 # OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-"""
-Command line client to PassOut.
-"""
 
 import sys
-
 import passout
-from passout import tray, PassOutError
+import argparse
+import argspander
+
+from passout import tray
 
 
-def usage(retcode):
-    """ Print usage and exit """
-    print(__doc__)
-    print("Usage: passout.py <command> <args>\n")
-    print("Available commands:")
-    print("  ls")
-    print("  add <pass_name>")
-    print("  rm <pass_name>")
-    print("  stdout <pass_name>")
-    print("  clip <pass_name>")
-    print("  printconfig")
-    print("  tray")
-    sys.exit(retcode)
-
-
-def cmd_add(cfg, *args):
-    (pw_name, ) = args
-    passout.add_password(cfg, pw_name)
-
-
-def cmd_ls(cfg, *args):
+@argspander.expand
+def cmd_ls(*args, **kwargs):
     for p in sorted(passout.get_password_names()):
         print(p)
 
 
-def cmd_rm(cfg, *args):
-    (pw_name, ) = args
-    passout.remove_password(cfg, pw_name)
+@argspander.expand
+def cmd_add(cfg, pass_name):
+    passout.add_password(cfg, pass_name)
 
 
-def cmd_stdout(cfg, *args):
+@argspander.expand
+def cmd_rm(cfg, pass_name):
+    passout.remove_password(cfg, pass_name)
+
+
+@argspander.expand
+def cmd_stdout(cfg, pass_name):
     """ Prints a password out of stdout (for use with, e.g. mutt) """
-    (pw_name, ) = args
-    print(passout.get_password(cfg, pw_name))
+    print(passout.get_password(cfg, pass_name))
 
 
-def cmd_clip(cfg, *args):
+@argspander.expand
+def cmd_clip(cfg, pass_name):
     """ Puts a password in the GUI clipboard """
-    (pw_name, ) = args
-    passout.load_clipboard(cfg, pw_name)
+    passout.load_clipboard(cfg, pass_name)
 
 
-def cmd_printconfig(cfg, *args):
+@argspander.expand
+def cmd_printconfig(cfg):
     print(cfg)
 
 
-def cmd_tray(cfg, *args):
+@argspander.expand
+def cmd_tray(cfg):
     tray.run_tray(cfg)
-
-
-# Table of commands
-# command_name : (n_args, func)
-CMD_TAB = {
-    "ls":          (0, cmd_ls),
-    "add":         (1, cmd_add),
-    "rm":          (1, cmd_rm),
-    "stdout":      (1, cmd_stdout),
-    "clip":        (1, cmd_clip),
-    "printconfig": (0, cmd_printconfig),
-    "tray":        (0, cmd_tray),
-}
 
 
 def entrypoint():
     """ Execution begins here """
 
     cfg = passout.get_config()
+    pass_name_str = "pass_name"
 
-    try:
-        cmd = sys.argv[1]
-    except IndexError:
-        usage(666)
+    parser = argparse.ArgumentParser(description="Simple password manager built on gpg")
+    subparsers = parser.add_subparsers(title="command")
 
-    try:
-        (expect_n_args, func) = CMD_TAB[cmd]
-    except KeyError:
-        raise PassOutError("Unknown command '%s'" % cmd)
-        usage(666)
+    # ls
+    ls = subparsers.add_parser("ls", help="List passwords stored")
+    ls.set_defaults(func=cmd_ls)
 
-    n_args = len(sys.argv) - 2
-    if n_args != expect_n_args:
-        raise PassOutError("Wrong argument count for command '%s'" % cmd)
+    # add
+    add = subparsers.add_parser("add", help="Add a new password")
+    add.set_defaults(func=cmd_add, cfg=cfg)
+    add.add_argument(pass_name_str, help="Name of the password to add")
 
-    func(cfg, *sys.argv[2:])
+    # rm
+    rm = subparsers.add_parser("rm", help="Remove a stored password")
+    rm.set_defaults(func=cmd_rm, cfg=cfg)
+    rm.add_argument(pass_name_str, help="Name of the password to remove")
+
+    # stdout
+    stdout = subparsers.add_parser("stdout", help="Print password to stdout")
+    stdout.set_defaults(func=cmd_stdout, cfg=cfg)
+    stdout.add_argument(pass_name_str, help="Name of the password to print")
+
+    # clip
+    clip = subparsers.add_parser("clip", help="Put the password in the X clipboard")
+    clip.set_defaults(func=cmd_clip, cfg=cfg)
+    clip.add_argument(pass_name_str, help="Name of the password to place in the X clipboard")
+
+    # config
+    config = subparsers.add_parser("config", help="Print the current passout configuration")
+    config.set_defaults(func=cmd_printconfig, cfg=cfg)
+
+    # tray
+    tray = subparsers.add_parser("tray", help="Start the GTK tray icon")
+    tray.set_defaults(func=cmd_tray, cfg=cfg)
+
+    args = parser.parse_args()
+    args.func(args, expand=True)
 
 if __name__ == "__main__":
     entrypoint()
