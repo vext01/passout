@@ -86,7 +86,6 @@ def get_config():
     cfg = {
         "gpg":    "gpg2",
         "id":     None,
-        "xclip": "xclip",
     }
 
     if not os.path.exists(CONFIG_FILE):
@@ -121,23 +120,19 @@ def get_config():
     return cfg
 
 
-def load_clipboard(cfg, pwname):
-    passwd = get_password(cfg, pwname)
+def load_clipboard(cfg, pw_name):
+    from gi.repository import Gtk, Gdk
 
-    try:
-        pipe = subprocess.Popen(
-            cfg["xclip"], stdin=subprocess.PIPE, universal_newlines=True
-        )
-    except OSError:
-        raise PassOutError("Xclip utility '%s' not found" % cfg["xclip"])
-
-    (out, err) = pipe.communicate(passwd)
-
-    if pipe.returncode != 0:
-        raise PassOutError(
-            "'%s' returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
-            (cfg["xclip"], out, err)
-        )
+    passwd = get_password(cfg, pw_name)
+    # Copy to both X11 and GTK clipboards (sigh)
+    # XXX despite my best attempts, the X11 clipboard does not persist after
+    # the process exits. Only a problem from the CLI, as the tray sits
+    # around for the length of the desktop session.
+    for clip_target in [Gdk.SELECTION_PRIMARY, Gdk.SELECTION_CLIPBOARD]:
+        clipboard = Gtk.Clipboard.get(clip_target)
+        clipboard.set_can_store(None)
+        clipboard.set_text(passwd, -1)
+        clipboard.store()
 
 
 def get_password_names():
