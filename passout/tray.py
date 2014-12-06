@@ -32,14 +32,14 @@ class PassoutSysTrayApp(object):
     def clip_password(self, item):
         pwname = item.get_label()
 
-        from passout import put_password_into_clipboard
-        put_password_into_clipboard(self.cfg, pwname)
+        from passout import load_clipboard
+        load_clipboard(self.cfg, pwname)
 
     def show_menu(self, icon, button, time):
         self.menu = gtk.Menu()
 
-        from passout import get_all_password_names
-        for pwname in sorted(get_all_password_names()):
+        from passout import get_password_names
+        for pwname in sorted(get_password_names()):
             item = gtk.MenuItem(pwname)
             item.show()
             self.menu.append(item)
