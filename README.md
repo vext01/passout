@@ -9,7 +9,7 @@ I use a lot of programs that require passwords, e.g. offlineimap/msmtp/...
 
  * Put them in clear text in a config file, e.g. `.netrc`.
  * Use a password manager such as gnome-keyring, pwsafe, keepassx, etc.
- 
+
 The former is obviously annoying. The latter works, but I found that these
 tools were either too heavyweight, or required me to type the master
 password every time I needed to access the password store.
@@ -20,10 +20,9 @@ in Python 3. You can set it up in minutes.
 ## Dependencies
 
   * GPG.
-  * Python 2.7 (3 may work also).
-  * xclip (for clipboard support only).
+  * Python 2.7 or 3 (2.7 may be deprecated soon).
   * A GUI pinentry program, e.g. `gtk-pinentry-2` (for X11 integration only).
-  * PyGTK (System tray integration only).
+  * PyGobject (System tray integration only).
 
 For developers:
 
