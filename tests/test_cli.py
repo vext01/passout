@@ -7,7 +7,7 @@ import pytest
 import support
 
 
-class TestCmds(support.PassOutCliTest):
+class TestCLI(support.PassOutCliTest):
     """ These test loosely check the command line interface.
     These tests are supplemented with proper function-level unit tests"""
 
