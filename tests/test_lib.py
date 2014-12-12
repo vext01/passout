@@ -69,7 +69,6 @@ class TestLib(support.PassOutLibTest):
         err_str = "No password named '%s'" % rand_pwname
         assert exc_info.value.args[0] == err_str
 
-
     def test_use_bad_gpg_id(self, cfg, rand_pwname, rand_pw):
         cfg['id'] = "BOGUS@WiBbLe.CoM"
         with pytest.raises(PassOutError) as exc_info:

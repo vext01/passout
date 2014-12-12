@@ -14,7 +14,6 @@
 # OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import sys
 import passout
 import argparse
 import argspander
@@ -66,7 +65,8 @@ def entrypoint():
     cfg = passout.get_config()
     pass_name_str = "pass_name"
 
-    parser = argparse.ArgumentParser(description="Simple password manager built on gpg")
+    parser = argparse.ArgumentParser(
+        description="Simple password manager built on gpg")
     subparsers = parser.add_subparsers(title="command")
 
     # ls
@@ -89,12 +89,16 @@ def entrypoint():
     stdout.add_argument(pass_name_str, help="Name of the password to print")
 
     # clip
-    clip = subparsers.add_parser("clip", help="Put the password in the X clipboard")
+    clip = subparsers.add_parser("clip",
+                                 help="Put the password in the X clipboard")
     clip.set_defaults(func=cmd_clip, cfg=cfg)
-    clip.add_argument(pass_name_str, help="Name of the password to place in the X clipboard")
+    clip.add_argument(pass_name_str,
+                      help="Name of the password to place in the X clipboard")
 
     # config
-    config = subparsers.add_parser("config", help="Print the current passout configuration")
+    config = subparsers.add_parser("config",
+                                   help="Print the current "
+                                   "passout configuration")
     config.set_defaults(func=cmd_printconfig, cfg=cfg)
 
     # tray
