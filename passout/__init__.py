@@ -52,7 +52,7 @@ def _get_pass_file(passname):
 # //////// Exposed API functions below //////////////
 
 
-def get_password(cfg, pwname):
+def get_password(cfg, pwname, testing=False):
     pw_file = _get_pass_file(pwname)
 
     if not os.path.exists(pw_file):
@@ -62,9 +62,16 @@ def get_password(cfg, pwname):
     # a GUI pinentry. /dev/tty not configured. Annoying XXX
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "--no-tty", "-d", pw_file)
 
+    # When we are testing we cannot pass a stdin.
+    # (pytest capture upsets subprocess)
+    if testing:
+        stdin = None
+    else:
+        stdin = sys.stdin
+
     try:
         pipe = subprocess.Popen(
-            gpg_args, stdin=sys.stdin, stdout=subprocess.PIPE,
+            gpg_args, stdin=stdin, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, universal_newlines=True
         )
     except OSError:
@@ -81,6 +88,8 @@ def get_password(cfg, pwname):
 
 def get_config():
     """ return a configuration (using config file if exists) """
+
+    _check_dirs()
 
     # default config
     cfg = {
@@ -120,10 +129,10 @@ def get_config():
     return cfg
 
 
-def load_clipboard(cfg, pw_name):
+def load_clipboard(cfg, pw_name, testing=False):
     from gi.repository import Gtk, Gdk
 
-    passwd = get_password(cfg, pw_name)
+    passwd = get_password(cfg, pw_name, testing)
     # Copy to both X11 and GTK clipboards (sigh)
     # XXX despite my best attempts, the X11 clipboard does not persist after
     # the process exits. Only a problem from the CLI, as the tray sits
@@ -139,13 +148,14 @@ def get_password_names():
     return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg")]
 
 
-def add_password(cfg, pw_name):
+def add_password(cfg, pw_name, passwd=None):
     out_file = _get_pass_file(pw_name)
     if os.path.exists(out_file):
         raise PassOutError("A password called '%s' already exists" % pw_name)
 
-    # XXX library should not be interactive! Pass in the password (?)
-    passwd = getpass.getpass()
+    if passwd is None:
+        passwd = getpass.getpass()
+
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
 
     fd = os.open(out_file, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR)

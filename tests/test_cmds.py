@@ -7,7 +7,7 @@ import pytest
 import support
 
 
-class TestCmds(support.PexpectTest):
+class TestCmds(support.PassOutCliTest):
     """ These test loosely check the command line interface.
     These tests are supplemented with proper function-level unit tests"""
 
@@ -96,5 +96,3 @@ class TestCmds(support.PexpectTest):
         child1.expect_exact(
             "No password named '%s'" % rand_pwname)
         child1.expect_exact(pexpect.EOF)
-
-    # XXX Try to add a password under a non-existent GPG id. Should fail.

@@ -22,6 +22,9 @@ GPG_ID = "test@localhost"
 PASSOUT = os.path.join(TEST_DIR, "..", "passout.py")
 PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passoutrc")
 
+sys.path.append(os.path.join(TEST_DIR, ".."))
+import passout
+
 
 class TestError(Exception):
     pass
@@ -57,7 +60,8 @@ def _make_fresh_passout_dir(gpg):
         config.write("id=%s\ngpg=%s\n" % (GPG_ID, gpg))
 
 
-class PexpectTest(object):
+class PassOutBaseTest(object):
+
     @pytest.fixture(autouse=True)
     def passout(self, request):
         """Fixture implicitely run once for each test.
@@ -85,5 +89,14 @@ class PexpectTest(object):
     rand_pw = _uuid_hex
     rand_pwname = _uuid_hex
 
+
+class PassOutCliTest(PassOutBaseTest):
     def run_passout(self, *args):
         return pexpect.spawn("%s %s" % (PASSOUT, " ".join(args)))
+
+
+class PassOutLibTest(PassOutBaseTest):
+
+    @pytest.fixture
+    def cfg(self):
+        return passout.get_config()
