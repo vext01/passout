@@ -1,5 +1,5 @@
-import subprocess
 import os
+import sys
 
 import pexpect
 import pytest
@@ -82,8 +82,14 @@ class TestCmds(support.PexpectTest):
         for clip_target in [Gdk.SELECTION_CLIPBOARD]:
             clipboard = Gtk.Clipboard.get(clip_target)
             data = clipboard.wait_for_contents(Gdk.SELECTION_TYPE_STRING)
+
             data_s = data.get_data()
-            assert data_s == rand_pw
+
+            # Sigh
+            if sys.version_info[0] >= 3:
+                assert data_s == bytes(rand_pw, "ascii")
+            else:
+                assert data_s == rand_pw
 
     def test_rm_nonexisting_pw(self, rand_pwname):
         child1 = self.run_passout("rm", rand_pwname)

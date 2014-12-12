@@ -1,6 +1,7 @@
 import os
 import shutil
 import uuid
+import sys
 from distutils.spawn import find_executable
 
 import pexpect
