@@ -36,7 +36,7 @@ class TestLib(support.PassOutLibTest):
 
     def test_rm(self, cfg, rand_pwname, rand_pw):
         passout.add_password(cfg, rand_pwname, rand_pw)
-        passout.remove_password(cfg, rand_pwname)
+        passout.remove_password(rand_pwname)
         got = passout.get_password_names()
         assert got == []
 
@@ -62,9 +62,9 @@ class TestLib(support.PassOutLibTest):
             else:
                 assert data_s == rand_pw
 
-    def test_rm_nonexisting_pw(self, cfg, rand_pwname):
+    def test_rm_nonexisting_pw(self, rand_pwname):
         with pytest.raises(PassOutError) as exc_info:
-            passout.remove_password(cfg, rand_pwname)
+            passout.remove_password(rand_pwname)
 
         err_str = "No password named '%s'" % rand_pwname
         assert exc_info.value.args[0] == err_str

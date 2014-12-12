@@ -34,8 +34,8 @@ def cmd_add(cfg, pass_name):
 
 
 @argspander.expand
-def cmd_rm(cfg, pass_name):
-    passout.remove_password(cfg, pass_name)
+def cmd_rm(pass_name):
+    passout.remove_password(pass_name)
 
 
 @argspander.expand

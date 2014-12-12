@@ -176,7 +176,7 @@ def add_password(cfg, pw_name, passwd=None):
         raise PassOutError("gpg returned non-zero")
 
 
-def remove_password(cfg, pw_name):
+def remove_password(pw_name):
 
     pw_file = _get_pass_file(pw_name)
 
