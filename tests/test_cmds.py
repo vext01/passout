@@ -21,8 +21,8 @@ class TestCmds(support.PexpectTest):
         child2.expect(rand_pw)
         child2.expect(pexpect.EOF)
 
-    def test_printconfig(self):
-        child1 = self.run_passout("printconfig")
+    def test_config(self):
+        child1 = self.run_passout("config")
         child1.expect("{'gpg': '.*?', 'id': '.*?'}")
         child1.expect(pexpect.EOF)
 
