@@ -26,7 +26,10 @@ in Python 3. You can set it up in minutes.
 
 For developers:
 
-  * pytest
+  * pytest.
+  * The pexpect module.
+  * The sh module.
+  * The argspander module.
 
 ## Quick Start
 
