@@ -31,6 +31,8 @@ if not PASSOUT_HOME:
 CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crytpo_store")
 CONFIG_FILE = os.path.join(PASSOUT_HOME, "passoutrc")
 
+GROUP_SEP = "__"
+
 
 class PassOutError(Exception):
     pass
@@ -169,7 +171,7 @@ def get_password_names_grouped(sort=True):
     dct = {}
     for pwname in sorted(get_password_names()):
         sub = dct
-        elems = pwname.split("__")
+        elems = pwname.split(GROUP_SEP)
         for e in elems:
             if e not in sub:
                 sub[e] = {}

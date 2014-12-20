@@ -92,7 +92,8 @@ class PassOutBaseTest(object):
 
 class PassOutCliTest(PassOutBaseTest):
     def run_passout(self, *args):
-        return pexpect.spawn("%s %s" % (PASSOUT, " ".join(args)))
+        return pexpect.spawn("%s %s %s" %
+                             (sys.executable, PASSOUT, " ".join(args)))
 
 
 class PassOutLibTest(PassOutBaseTest):
