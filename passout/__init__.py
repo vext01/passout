@@ -46,6 +46,7 @@ def _check_dirs():
 
 
 def _get_pass_file(passname):
+    _check_dirs()
     return os.path.join(CRYPTO_DIR, passname) + ".gpg"
 
 
@@ -199,7 +200,3 @@ def remove_password(pw_name):
         raise PassOutError("No password named '%s'" % pw_name)
 
     os.unlink(pw_file)
-
-# /////////// Import time actions /////////////
-
-_check_dirs()
