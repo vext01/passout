@@ -19,6 +19,7 @@ except ImportError:
 
 from passout import get_password_names
 
+
 class PasswordMenuItem(Gtk.MenuItem):
     """Each password has a PasswordMenuItem. We need this so we can
     store the underlying password name (complete with group prefix)
@@ -37,7 +38,7 @@ class PassoutSysTrayApp(object):
         self.tray = Gtk.StatusIcon()
         self.tray.set_from_stock(Gtk.STOCK_DIALOG_AUTHENTICATION)
         self.tray.connect('popup-menu', self.show_menu)
-        #self.tray.set_tooltip("PassOut")
+        # self.tray.set_tooltip("PassOut")
         self.tray.set_visible(True)
 
     def clip_password(self, item):
@@ -55,7 +56,7 @@ class PassoutSysTrayApp(object):
             sub = dct
             elems = pwname.split("__")
             for e in elems:
-                if not sub.has_key(e):
+                if e not in sub:
                     sub[e] = {}
                 sub = sub[e]
         return dct
@@ -66,12 +67,12 @@ class PassoutSysTrayApp(object):
         for item, sub_items in item_dct.iteritems():
             sub_path = cur_path + (item, )
 
-            if sub_items: # i.e. non-empty dict
+            if sub_items:  # i.e. non-empty dict
                 menu_item = Gtk.MenuItem(item)
                 sub_menu = Gtk.Menu()
                 menu_item.set_submenu(sub_menu)
                 self._add_items_to_menu(sub_menu, sub_items, sub_path)
-            else: # sub_items is an empty dict
+            else:  # sub_items is an empty dict
                 menu_item = PasswordMenuItem("__".join(sub_path), item)
                 menu_item.connect('activate', self.clip_password)
 
@@ -95,6 +96,7 @@ class PassoutSysTrayApp(object):
         exit.connect('activate', Gtk.main_quit)
 
         self.menu.popup(None, None, None, None, button, time)
+
 
 def run_tray(cfg):
     PassoutSysTrayApp(cfg)
