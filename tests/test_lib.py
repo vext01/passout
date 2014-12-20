@@ -77,7 +77,6 @@ class TestLib(support.PassOutLibTest):
         err_str = "gpg returned non-zero"
         assert exc_info.value.args[0] == err_str
 
-
     def test_get_password_names_empty(self, cfg, rand_pw):
         assert passout.get_password_names() == []
 
@@ -106,7 +105,6 @@ class TestLib(support.PassOutLibTest):
 
         assert got_dct == expect_dct
 
-
     def test_get_password_names_grouped_sort(self, cfg, rand_pw):
         passout.add_password(cfg, "aaa", rand_pw)
         passout.add_password(cfg, "xxx", rand_pw)
@@ -115,9 +113,8 @@ class TestLib(support.PassOutLibTest):
 
         got_dct = passout.get_password_names_grouped()
 
-        order = [ i for i in got_dct]
+        order = [i for i in got_dct]
         assert order == ["aaa", "bbb", "www", "xxx"]
-
 
     def test_get_password_names_grouped_sort2(self, cfg, rand_pw):
         passout.add_password(cfg, "x__aaa", rand_pw)
@@ -127,9 +124,8 @@ class TestLib(support.PassOutLibTest):
 
         got_dct = passout.get_password_names_grouped()["x"]
 
-        order = [ i for i in got_dct]
+        order = [i for i in got_dct]
         assert order == ["aaa", "bbb", "www", "xxx"]
-
 
     def test_get_password_names_grouped_empty(self):
         got_dct = passout.get_password_names_grouped()

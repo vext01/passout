@@ -55,7 +55,7 @@ def _sort_dict(dct):
     new_dct = collections.OrderedDict()
 
     for k, v in sorted(dct.items()):
-        if not v: # i.e. empty dict
+        if not v:  # i.e. empty dict
             new_dct[k] = v
         else:
             new_dct[k] = _sort_dict(v)
@@ -178,6 +178,7 @@ def get_password_names_grouped(sort=True):
         return dct
     else:
         return _sort_dict(dct)
+
 
 def add_password(cfg, pw_name, passwd=None):
     out_file = _get_pass_file(pw_name)

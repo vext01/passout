@@ -17,7 +17,7 @@ try:
 except ImportError:
     print("No GTK support for Python found, cannot run tray")
 
-from passout import get_password_names, get_password_names_grouped
+from passout import get_password_names_grouped, load_clipboard
 
 
 class PasswordMenuItem(Gtk.MenuItem):
@@ -44,7 +44,6 @@ class PassoutSysTrayApp(object):
     def clip_password(self, item):
         pwname = item.password_name
 
-        from passout import load_clipboard
         load_clipboard(self.cfg, pwname)
 
     def _add_items_to_menu(self, menu, item_dct, cur_path=tuple()):
