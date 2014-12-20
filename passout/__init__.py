@@ -22,6 +22,7 @@ import sys
 import stat
 import getpass
 import subprocess
+import collections
 
 PASSOUT_HOME = os.environ.get("PASSOUT_HOME")
 if not PASSOUT_HOME:
@@ -48,6 +49,18 @@ def _check_dirs():
 def _get_pass_file(passname):
     _check_dirs()
     return os.path.join(CRYPTO_DIR, passname) + ".gpg"
+
+
+def _sort_dict(dct):
+    new_dct = collections.OrderedDict()
+
+    for k, v in sorted(dct.items()):
+        if not v: # i.e. empty dict
+            new_dct[k] = v
+        else:
+            new_dct[k] = _sort_dict(v)
+
+    return new_dct
 
 
 # //////// Exposed API functions below //////////////
@@ -150,7 +163,7 @@ def get_password_names():
     return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg")]
 
 
-def get_password_names_grouped():
+def get_password_names_grouped(sort=True):
     """Builds a tree of passwords in their groupings.
     Returns a dict of the form: Name -> SubItems"""
     dct = {}
@@ -161,8 +174,10 @@ def get_password_names_grouped():
             if e not in sub:
                 sub[e] = {}
             sub = sub[e]
-    return dct
-
+    if not sort:
+        return dct
+    else:
+        return _sort_dict(dct)
 
 def add_password(cfg, pw_name, passwd=None):
     out_file = _get_pass_file(pw_name)
