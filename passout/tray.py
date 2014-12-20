@@ -17,6 +17,17 @@ try:
 except ImportError:
     print("No GTK support for Python found, cannot run tray")
 
+from passout import get_password_names
+
+class PasswordMenuItem(Gtk.MenuItem):
+    """Each password has a PasswordMenuItem. We need this so we can
+    store the underlying password name (complete with group prefix)
+    inside the item."""
+
+    def __init__(self, password_name, label):
+        self.password_name = password_name
+        Gtk.MenuItem.__init__(self, label)
+
 
 class PassoutSysTrayApp(object):
     def __init__(self, cfg):
@@ -30,20 +41,48 @@ class PassoutSysTrayApp(object):
         self.tray.set_visible(True)
 
     def clip_password(self, item):
-        pwname = item.get_label()
+        pwname = item.password_name
 
         from passout import load_clipboard
         load_clipboard(self.cfg, pwname)
 
+    # XXX make this a library function
+    def _build_menu_dict(self):
+        """Builds a tree of passwords in their groupings.
+        Returns a dict of the form: Name -> SubItems"""
+        dct = {}
+        for pwname in sorted(get_password_names()):
+            sub = dct
+            elems = pwname.split("__")
+            for e in elems:
+                if not sub.has_key(e):
+                    sub[e] = {}
+                sub = sub[e]
+        return dct
+
+    def _add_items_to_menu(self, menu, item_dct, cur_path=tuple()):
+        """Recursively add items to the menu"""
+
+        for item, sub_items in item_dct.iteritems():
+            sub_path = cur_path + (item, )
+
+            if sub_items: # i.e. non-empty dict
+                menu_item = Gtk.MenuItem(item)
+                sub_menu = Gtk.Menu()
+                menu_item.set_submenu(sub_menu)
+                self._add_items_to_menu(sub_menu, sub_items, sub_path)
+            else: # sub_items is an empty dict
+                menu_item = PasswordMenuItem("__".join(sub_path), item)
+                menu_item.connect('activate', self.clip_password)
+
+            menu_item.show()
+            menu.append(menu_item)
+
     def show_menu(self, icon, button, time):
         self.menu = Gtk.Menu()
 
-        from passout import get_password_names
-        for pwname in sorted(get_password_names()):
-            item = Gtk.MenuItem(pwname)
-            item.show()
-            self.menu.append(item)
-            item.connect('activate', self.clip_password)
+        menu_dct = self._build_menu_dict()
+        self._add_items_to_menu(self.menu, menu_dct)
 
         sep = Gtk.SeparatorMenuItem()
         sep.show()
