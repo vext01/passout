@@ -76,4 +76,3 @@ class TestLib(support.PassOutLibTest):
 
         err_str = "gpg returned non-zero"
         assert exc_info.value.args[0] == err_str
-    # XXX Try to add a password under a non-existent GPG id. Should fail.
