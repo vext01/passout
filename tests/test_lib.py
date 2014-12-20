@@ -76,3 +76,37 @@ class TestLib(support.PassOutLibTest):
 
         err_str = "gpg returned non-zero"
         assert exc_info.value.args[0] == err_str
+
+
+    def test_get_password_names_empty(self, cfg, rand_pw):
+        assert passout.get_password_names() == []
+
+    def test_get_password_names_grouped(self, cfg, rand_pw):
+        passout.add_password(cfg, "pass-1", rand_pw)
+        passout.add_password(cfg, "group1__pass1-1", rand_pw)
+        passout.add_password(cfg, "group1__group1-1__pass1-1-1", rand_pw)
+        passout.add_password(cfg, "group1__group1-1__pass1-1-2", rand_pw)
+        passout.add_password(cfg, "group2__pass2-1", rand_pw)
+
+        got_dct = passout.get_password_names_grouped()
+
+        expect_dct = {
+            'pass-1': {},
+            'group1': {
+                'pass1-1': {},
+                'group1-1': {
+                    'pass1-1-1': {},
+                    'pass1-1-2': {},
+                },
+            },
+            'group2': {
+                'pass2-1': {}
+            },
+        }
+
+        assert got_dct == expect_dct
+
+
+    def test_get_password_names_grouped_empty(self):
+        got_dct = passout.get_password_names_grouped()
+        assert got_dct == {}

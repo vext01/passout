@@ -145,7 +145,22 @@ def load_clipboard(cfg, pw_name, testing=False):
 
 
 def get_password_names():
+    _check_dirs()
     return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg")]
+
+
+def get_password_names_grouped():
+    """Builds a tree of passwords in their groupings.
+    Returns a dict of the form: Name -> SubItems"""
+    dct = {}
+    for pwname in sorted(get_password_names()):
+        sub = dct
+        elems = pwname.split("__")
+        for e in elems:
+            if e not in sub:
+                sub[e] = {}
+            sub = sub[e]
+    return dct
 
 
 def add_password(cfg, pw_name, passwd=None):

@@ -17,7 +17,7 @@ try:
 except ImportError:
     print("No GTK support for Python found, cannot run tray")
 
-from passout import get_password_names
+from passout import get_password_names, get_password_names_grouped
 
 
 class PasswordMenuItem(Gtk.MenuItem):
@@ -47,20 +47,6 @@ class PassoutSysTrayApp(object):
         from passout import load_clipboard
         load_clipboard(self.cfg, pwname)
 
-    # XXX make this a library function
-    def _build_menu_dict(self):
-        """Builds a tree of passwords in their groupings.
-        Returns a dict of the form: Name -> SubItems"""
-        dct = {}
-        for pwname in sorted(get_password_names()):
-            sub = dct
-            elems = pwname.split("__")
-            for e in elems:
-                if e not in sub:
-                    sub[e] = {}
-                sub = sub[e]
-        return dct
-
     def _add_items_to_menu(self, menu, item_dct, cur_path=tuple()):
         """Recursively add items to the menu"""
 
@@ -82,7 +68,7 @@ class PassoutSysTrayApp(object):
     def show_menu(self, icon, button, time):
         self.menu = Gtk.Menu()
 
-        menu_dct = self._build_menu_dict()
+        menu_dct = get_password_names_grouped()
         self._add_items_to_menu(self.menu, menu_dct)
 
         sep = Gtk.SeparatorMenuItem()
