@@ -96,6 +96,12 @@ You can also run `passout.py tray` to place an icon in your desktop
 environment's system tray. Right click the icon and select a password name
 to have the password placed in the system clipboard.
 
+When using the system tray, passwords can be organised into groups which
+appear as sub-menus. To achieve this, use double underscore in your password
+name to indicate groups. E.g. a password called `mail__gmail` will put a
+`gmail` password into a `mail` sub-menu. Groups can be nested arbitrarily
+deep.
+
 If someone knows how to integrate with gdm/kdm, please send a pull request.
 
 ## Tests
