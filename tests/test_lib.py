@@ -51,16 +51,20 @@ class TestLib(support.PassOutLibTest):
         passout.load_clipboard(cfg, rand_pwname, testing=True)
 
         # Testing both X11 and GTK clipboards
-        for clip_target in [Gdk.SELECTION_CLIPBOARD]:
+        for clip_target in [Gdk.SELECTION_CLIPBOARD, Gdk.SELECTION_PRIMARY]:
             clipboard = Gtk.Clipboard.get(clip_target)
             data = clipboard.wait_for_contents(Gdk.SELECTION_TYPE_STRING)
-            data_s = data.get_data()
 
-            # Sigh
-            if sys.version_info[0] >= 3:
-                assert data_s == bytes(rand_pw, "ascii")
+            if data:
+                data_s = data.get_data()
+
+                # Sigh
+                if sys.version_info[0] >= 3:
+                    assert data_s == bytes(rand_pw, "ascii")
+                else:
+                    assert data_s == rand_pw
             else:
-                assert data_s == rand_pw
+                assert False # failed to read clipboard
 
     def test_rm_nonexisting_pw(self, rand_pwname):
         with pytest.raises(PassOutError) as exc_info:
