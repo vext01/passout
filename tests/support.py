@@ -41,7 +41,6 @@ def _make_key(gpg):
     gpg_cmd = sh.Command(gpg)
     gpg_cmd("--batch", "--gen-key", GPG_TEMPLATE)
 
-
 def _remove_passout_dir():
     if os.path.exists(PASSOUT_DIR):
         shutil.rmtree(PASSOUT_DIR)
