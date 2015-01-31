@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 # Copyright (c) 2014, Edd Barrett <vext01@gmail.com>
 #
