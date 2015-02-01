@@ -23,6 +23,8 @@ import stat
 import getpass
 import subprocess
 import collections
+import logging
+from logging import info, debug
 
 PASSOUT_HOME = os.environ.get("PASSOUT_HOME")
 if not PASSOUT_HOME:
@@ -33,9 +35,17 @@ CONFIG_FILE = os.path.join(PASSOUT_HOME, "passoutrc")
 
 GROUP_SEP = "__"
 
-
 class PassOutError(Exception):
     pass
+
+DEBUG_LEVEL = os.environ.get("PASSOUT_DEBUG", None)
+if DEBUG_LEVEL is not None:
+    if DEBUG_LEVEL not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+        raise PassOutError("Invalid debug level")
+
+    attr = getattr(logging, DEBUG_LEVEL)
+    logging.basicConfig(level=attr)
+
 
 
 def _check_dirs():
@@ -44,6 +54,7 @@ def _check_dirs():
     for d in dirs:
         if not os.path.exists(d):
             os.mkdir(d)
+            debug("Creating %s" % d)
         if not os.path.isdir(d):
             raise PassOutError("'%s' is not a directory" % d)
 
@@ -64,11 +75,12 @@ def _sort_dict(dct):
 
     return new_dct
 
-
 # //////// Exposed API functions below //////////////
 
 
 def get_password(cfg, pwname, testing=False):
+    info("Getting password '%s'" % pwname)
+
     pw_file = _get_pass_file(pwname)
 
     if not os.path.exists(pw_file):
@@ -77,6 +89,7 @@ def get_password(cfg, pwname, testing=False):
     # Have not found a way for this to work with mutt+msmtp without using
     # a GUI pinentry. /dev/tty not configured. Annoying XXX
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "--no-tty", "-d", pw_file)
+    debug("Calling GPG tool with args: %s" % (gpg_args, ))
 
     # When we are testing we cannot pass a stdin.
     # (pytest capture upsets subprocess)
@@ -104,6 +117,8 @@ def get_password(cfg, pwname, testing=False):
 
 def get_config():
     """ return a configuration (using config file if exists) """
+
+    info("Reading config from '%s'" % CONFIG_FILE)
 
     _check_dirs()
 
@@ -154,6 +169,7 @@ def load_clipboard(cfg, pw_name, testing=False):
     # the process exits. Only a problem from the CLI, as the tray sits
     # around for the length of the desktop session.
     for clip_target in [Gdk.SELECTION_PRIMARY, Gdk.SELECTION_CLIPBOARD]:
+        info("Loading clipboard '%s'" % clip_target)
         clipboard = Gtk.Clipboard.get(clip_target)
         clipboard.set_can_store(None)
         clipboard.set_text(passwd, -1)
@@ -161,6 +177,8 @@ def load_clipboard(cfg, pw_name, testing=False):
 
 
 def get_password_names():
+    info("Getting list of passwords")
+
     _check_dirs()
     return [x[:-4] for x in os.listdir(CRYPTO_DIR) if x.endswith(".gpg")]
 
@@ -168,6 +186,9 @@ def get_password_names():
 def get_password_names_grouped(sort=True):
     """Builds a tree of passwords in their groupings.
     Returns a dict of the form: Name -> SubItems"""
+
+    info("Getting list of passwords (grouped)")
+
     dct = {}
     for pwname in sorted(get_password_names()):
         sub = dct
@@ -183,6 +204,8 @@ def get_password_names_grouped(sort=True):
 
 
 def add_password(cfg, pw_name, passwd=None):
+    info("Adding password '%s'" % pw_name)
+
     out_file = _get_pass_file(pw_name)
     if os.path.exists(out_file):
         raise PassOutError("A password called '%s' already exists" % pw_name)
@@ -191,6 +214,7 @@ def add_password(cfg, pw_name, passwd=None):
         passwd = getpass.getpass()
 
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
+    debug("Calling GPG tool with args: %s" % (gpg_args, ))
 
     fd = os.open(out_file, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR)
     try:
@@ -211,6 +235,7 @@ def add_password(cfg, pw_name, passwd=None):
 
 
 def remove_password(pw_name):
+    info("Removing password '%s'" % pw_name)
 
     pw_file = _get_pass_file(pw_name)
 

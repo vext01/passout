@@ -112,6 +112,17 @@ To run the test suite, from the source directory run:
 py.test tests/
 ```
 
+## Truobleshooting
+
+Try setting the `PASSOUT_DEBUG` environment. You can set this to any of
+the levels accepted by the logging module.
+
+E.g.:
+
+```
+export PASSOUT_DEBUG=DEBUG
+```
+
 ## License
 
 PassOut is distributed under the ISC license.
