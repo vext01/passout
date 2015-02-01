@@ -23,6 +23,7 @@ class TestLib(support.PassOutLibTest):
         passout.add_password(cfg, rand_pwname, rand_pw)
         passout.add_password(cfg, rand_pwname2, rand_pw)
         got = passout.get_password_names()
+        got.sort()
 
         assert got == [rand_pwname, rand_pwname2]
 

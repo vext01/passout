@@ -19,7 +19,7 @@ GPGS = ["gpg2", "gpg"]
 GPG_TEMPLATE = os.path.join(TEST_DIR, "key_template")
 GPG_ID = "test@localhost"
 
-PASSOUT = os.path.join(TEST_DIR, "..", "passout.py")
+PASSOUT = os.path.join(TEST_DIR, "..", "passout", "passoutcli.py")
 PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passoutrc")
 
 sys.path.append(os.path.join(TEST_DIR, ".."))
@@ -39,7 +39,7 @@ def _find_gpg():
 
 def _make_key(gpg):
     gpg_cmd = sh.Command(gpg)
-    gpg_cmd("--batch", "--gen-key", GPG_TEMPLATE)
+    gpg_cmd("--batch", "--gen-key", "--debug-quick-random", GPG_TEMPLATE)
 
 def _remove_passout_dir():
     if os.path.exists(PASSOUT_DIR):
@@ -67,7 +67,6 @@ class PassOutBaseTest(object):
 
         Creates a fresh passout setup ready for testing. This includes
         making a gpg key if one does not exist in the test dir."""
-
         gpg = _find_gpg()
         if not os.path.exists(GPG_DIR):
             _make_key(gpg)
@@ -91,8 +90,9 @@ class PassOutBaseTest(object):
 
 class PassOutCliTest(PassOutBaseTest):
     def run_passout(self, *args):
-        return pexpect.spawn("%s %s %s" %
-                             (sys.executable, PASSOUT, " ".join(args)))
+        return pexpect.spawn(
+            "%s %s %s" % (sys.executable, PASSOUT, " ".join(args)),
+        )
 
 
 class PassOutLibTest(PassOutBaseTest):

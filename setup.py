@@ -17,7 +17,7 @@ setup(
     long_description=long_description,
     author="Edd Barret",
     author_email="vext01@gmail.com",
-    packages=find_packages(),
+    packages=find_packages(exclude="tests"),
     include_package_data=True,
     zip_safe=False,
     install_requires=requirements,
