@@ -65,10 +65,7 @@ class TestCLI(support.PassOutCliTest):
 
     @pytest.mark.skipif(os.environ["DISPLAY"] is None, reason="No X11")
     def test_clip(self, rand_pwname, rand_pw):
-        try:
-            from gi.repository import Gtk, Gdk
-        except ImportError:
-            pytest.skip("No pygobject available")
+        # XXX skip if xclip not found
 
         child1 = self.run_passout("add", rand_pwname)
         child1.expect_exact("Password: ")
@@ -78,21 +75,11 @@ class TestCLI(support.PassOutCliTest):
         child2 = self.run_passout("clip", rand_pwname)
         child2.expect(pexpect.EOF)
 
-        # Only testing GTK clipboard, X11 one doesn't persist upon exit
-        for clip_target in [Gdk.SELECTION_CLIPBOARD]:
-            clipboard = Gtk.Clipboard.get(clip_target)
-            data = clipboard.wait_for_contents(Gdk.SELECTION_TYPE_STRING)
-
-            if data:
-                data_s = data.get_data()
-
-                # Sigh
-                if sys.version_info[0] >= 3:
-                    assert data_s == bytes(rand_pw, "ascii")
-                else:
-                    assert data_s == rand_pw
-            else:
-                assert False # failed to read clipboard
+        # Testing all clipboards
+        import passout
+        for clip in passout.XCLIP_CLIPBOARDS:
+            data = support.get_clipboard_text(clip)
+            assert data == rand_pw
 
     def test_rm_nonexisting_pw(self, rand_pwname):
         child1 = self.run_passout("rm", rand_pwname)

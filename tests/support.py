@@ -2,6 +2,7 @@ import os
 import shutil
 import uuid
 import sys
+import subprocess
 from distutils.spawn import find_executable
 
 import pexpect
@@ -57,6 +58,25 @@ def _make_fresh_passout_dir(gpg):
     os.mkdir(PASSOUT_DIR)
     with open(PASSOUT_CONFIG, "w") as config:
         config.write("id=%s\ngpg=%s\n" % (GPG_ID, gpg))
+
+def get_clipboard_text(clipboard):
+    assert clipboard in ("primary", "secondary", "clipboard")
+
+    xclip_args = ("xclip", "-o", "-selection", clipboard)
+    try:
+        pipe = subprocess.Popen(
+            xclip_args, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, universal_newlines=True
+        )
+    except OSError:
+        raise TestError("call to xclip failed")
+
+    (out, err) = pipe.communicate()
+
+    if pipe.returncode != 0:
+        raise TestError("gpg returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
+                           (out, err))
+    return out
 
 
 class PassOutBaseTest(object):
