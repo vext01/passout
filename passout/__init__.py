@@ -35,6 +35,7 @@ CONFIG_FILE = os.path.join(PASSOUT_HOME, "passoutrc")
 
 GROUP_SEP = "__"
 
+
 class PassOutError(Exception):
     pass
 
@@ -45,7 +46,6 @@ if DEBUG_LEVEL is not None:
 
     attr = getattr(logging, DEBUG_LEVEL)
     logging.basicConfig(level=attr)
-
 
 
 def _check_dirs():
@@ -161,6 +161,8 @@ def get_config():
 
 
 XCLIP_CLIPBOARDS = ["primary", "secondary", "clipboard"]
+
+
 def load_clipboard(cfg, pw_name, testing=False):
 
     passwd = get_password(cfg, pw_name, testing)
@@ -177,6 +179,7 @@ def load_clipboard(cfg, pw_name, testing=False):
         (out, err) = pipe.communicate(passwd)
         if pipe.returncode != 0:
             raise PassOutError("xlcip returned non-zero")
+
 
 def get_password_names():
     info("Getting list of passwords")
