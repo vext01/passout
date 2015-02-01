@@ -42,6 +42,7 @@ def _make_key(gpg):
     gpg_cmd = sh.Command(gpg)
     gpg_cmd("--batch", "--gen-key", GPG_TEMPLATE)
 
+
 def _remove_passout_dir():
     if os.path.exists(PASSOUT_DIR):
         shutil.rmtree(PASSOUT_DIR)
@@ -59,6 +60,7 @@ def _make_fresh_passout_dir(gpg):
     with open(PASSOUT_CONFIG, "w") as config:
         config.write("id=%s\ngpg=%s\n" % (GPG_ID, gpg))
 
+
 def get_clipboard_text(clipboard):
     assert clipboard in ("primary", "secondary", "clipboard")
 
@@ -75,7 +77,7 @@ def get_clipboard_text(clipboard):
 
     if pipe.returncode != 0:
         raise TestError("gpg returned non-zero\nSTDOUT: %s\nSTDERR: %s" %
-                           (out, err))
+                        (out, err))
     return out
 
 
