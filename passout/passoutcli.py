@@ -18,8 +18,6 @@ import passout
 import argparse
 import argspander
 
-from passout import tray
-
 
 @argspander.expand
 def cmd_ls(*args, **kwargs):
@@ -56,6 +54,7 @@ def cmd_printconfig(cfg):
 
 @argspander.expand
 def cmd_tray(cfg):
+    from passout import tray
     tray.run_tray(cfg)
 
 
