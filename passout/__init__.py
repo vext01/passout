@@ -26,6 +26,7 @@ import collections
 import logging
 from logging import info, debug
 
+VERSION = "0.1"
 PASSOUT_HOME = os.environ.get("PASSOUT_HOME")
 if not PASSOUT_HOME:
     PASSOUT_HOME = os.path.join(os.environ["HOME"], ".passout")

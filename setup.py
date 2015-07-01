@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+from passout import VERSION
 
 long_description = open("README.md", "r").read()
 
@@ -31,7 +32,7 @@ class PyTest(TestCommand):
 
 setup(
     name="passout",
-    version="0.1",
+    version=VERSION,
     license="ISC",
     description="Really simple password manager built on gpg",
     long_description=long_description,

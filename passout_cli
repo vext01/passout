@@ -57,6 +57,10 @@ def cmd_tray(cfg):
     from passout import tray
     tray.run_tray(cfg)
 
+@argspander.expand
+def cmd_version(cfg):
+    print("Passout-%s" % passout.VERSION)
+
 
 def entrypoint():
     """ Execution begins here """
@@ -103,6 +107,10 @@ def entrypoint():
     # tray
     tray = subparsers.add_parser("tray", help="Start the GTK tray icon")
     tray.set_defaults(func=cmd_tray, cfg=cfg)
+
+    # version
+    version = subparsers.add_parser("version", help="Show version and exit")
+    version.set_defaults(func=cmd_version, cfg=cfg)
 
     args = parser.parse_args()
     args.func(args, expand=True)
