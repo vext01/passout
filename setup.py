@@ -30,9 +30,5 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     keywords="password manager gpg",
-    entry_points={
-        "console_scripts": [
-            "passout = passout.passoutcli:entrypoint"
-        ]
-    }
+    scripts=["passout_cli"],
 )

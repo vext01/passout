@@ -20,7 +20,7 @@ GPGS = ["gpg2", "gpg"]
 GPG_TEMPLATE = os.path.join(TEST_DIR, "key_template")
 GPG_ID = "test@localhost"
 
-PASSOUT = os.path.join(TEST_DIR, "..", "passout", "passoutcli.py")
+PASSOUT = os.path.join(TEST_DIR, "..", "passout_cli")
 PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passoutrc")
 
 sys.path.append(os.path.join(TEST_DIR, ".."))
