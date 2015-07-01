@@ -57,6 +57,7 @@ def cmd_tray(cfg):
     from passout import tray
     tray.run_tray(cfg)
 
+
 @argspander.expand
 def cmd_version(cfg):
     print("Passout-%s" % passout.VERSION)
