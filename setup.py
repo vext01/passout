@@ -53,7 +53,11 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     keywords="password manager gpg",
-    scripts=["passout_cli"],
+    entry_points={
+        "console_scripts": [
+            "passout = passout.passout_cli:entrypoint"
+        ]
+    },
     tests_require=['pytest'],
     cmdclass={'test': PyTest},
 )
