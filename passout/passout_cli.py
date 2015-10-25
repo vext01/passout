@@ -14,7 +14,7 @@
 # OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import passout
+import __init__ as passout
 import argparse
 import argspander
 
@@ -56,6 +56,11 @@ def cmd_printconfig(cfg):
 def cmd_tray(cfg):
     from passout import tray
     tray.run_tray(cfg)
+
+
+@argspander.expand
+def cmd_version(cfg):
+    print("Passout-%s" % passout.VERSION)
 
 
 def entrypoint():
@@ -103,6 +108,10 @@ def entrypoint():
     # tray
     tray = subparsers.add_parser("tray", help="Start the GTK tray icon")
     tray.set_defaults(func=cmd_tray, cfg=cfg)
+
+    # version
+    version = subparsers.add_parser("version", help="Show version and exit")
+    version.set_defaults(func=cmd_version, cfg=cfg)
 
     args = parser.parse_args()
     args.func(args, expand=True)

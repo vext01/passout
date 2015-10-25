@@ -5,6 +5,8 @@ import pytest
 
 import support
 
+from passout import VERSION
+
 
 class TestCLI(support.PassOutCliTest):
     """ These test loosely check the command line interface.
@@ -84,4 +86,9 @@ class TestCLI(support.PassOutCliTest):
         child1 = self.run_passout("rm", rand_pwname)
         child1.expect_exact(
             "No password named '%s'" % rand_pwname)
+        child1.expect_exact(pexpect.EOF)
+
+    def test_version(self):
+        child1 = self.run_passout("version")
+        child1.expect_exact("Passout-%s" % VERSION)
         child1.expect_exact(pexpect.EOF)

@@ -1,0 +1,8 @@
+#!/bin/sh
+PASSOUT=`which passout`
+
+chosen=`${PASSOUT} ls | dmenu`
+
+if [ "${chosen}" != "" ]; then
+	${PASSOUT} clip ${chosen}
+fi

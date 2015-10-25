@@ -1,26 +1,28 @@
 from setuptools import setup, find_packages
+from passout import VERSION
 
-long_description = open("README.md", "r").read()
+LONG_DESCRIPTION = open("README.md", "r").read()
 
-requirements = [
+REQUIREMENTS = [
     "argspander",
     "pexpect",
     "pytest",
     "sh",
 ]
 
+
 setup(
     name="passout",
-    version="0.1",
+    version=VERSION,
     license="ISC",
     description="Really simple password manager built on gpg",
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     author="Edd Barret",
     author_email="vext01@gmail.com",
     packages=find_packages(exclude="tests"),
     include_package_data=True,
     zip_safe=False,
-    install_requires=requirements,
+    install_requires=REQUIREMENTS,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
@@ -32,7 +34,8 @@ setup(
     keywords="password manager gpg",
     entry_points={
         "console_scripts": [
-            "passout = passout.passoutcli:entrypoint"
+            "passout = passout.passout_cli:entrypoint"
         ]
-    }
+    },
+    tests_require=['pytest'],
 )
