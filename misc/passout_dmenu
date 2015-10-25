@@ -1,5 +1,5 @@
 #!/bin/sh
-PASSOUT=`which passout_cli`
+PASSOUT=`which passout`
 
 chosen=`${PASSOUT} ls | dmenu`
 
