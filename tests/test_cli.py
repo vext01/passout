@@ -2,6 +2,7 @@ import os
 
 import pexpect
 import pytest
+import sys
 
 import support
 
@@ -24,7 +25,7 @@ class TestCLI(support.PassOutCliTest):
 
     def test_config(self):
         child1 = self.run_passout("config")
-        child1.expect("{'gpg': '.*?', 'id': '.*?'}")
+        child1.expect('{"gpg": ".*?", "id": ".*?"}')
         child1.expect(pexpect.EOF)
 
     def test_ls(self, rand_pwname, rand_pw):

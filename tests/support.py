@@ -22,7 +22,7 @@ GPG_ID = "test@localhost"
 
 SOURCE_DIR = os.path.abspath(os.path.join(TEST_DIR, ".."))
 PASSOUT = os.path.join(SOURCE_DIR, "passout", "passout_cli.py")
-PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passoutrc")
+PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passout.json")
 
 sys.path.append(os.path.join(TEST_DIR, ".."))
 import passout
@@ -59,7 +59,8 @@ def _make_fresh_passout_dir(gpg):
 
     os.mkdir(PASSOUT_DIR)
     with open(PASSOUT_CONFIG, "w") as config:
-        config.write("id=%s\ngpg=%s\n" % (GPG_ID, gpg))
+        json_s = '{"id": "%s", "gpg": "%s"}' % (GPG_ID, gpg)
+        config.write(json_s)
 
 
 def get_clipboard_text(clipboard):

@@ -1,10 +1,21 @@
 import os
 
 import pytest
+import json
 
 import support
 import passout
 from passout import PassOutError
+
+
+def dummy_check_dirs():
+    pass
+
+
+def mk_dummy_json_load(dct):
+    def dummy_json_load(*args, **kwargs):
+        return dct
+    return dummy_json_load
 
 
 class TestLib(support.PassOutLibTest):
@@ -120,3 +131,38 @@ class TestLib(support.PassOutLibTest):
     def test_get_password_names_grouped_empty(self):
         got_dct = passout.get_password_names_grouped()
         assert got_dct == {}
+
+    def test_get_config0001(self, monkeypatch):
+        """If we specify all config options, we get back a dict
+        simply containing those options"""
+
+        config = {u"id": u"jim@bob.com", u"gpg": u"gpg2"}
+
+        monkeypatch.setattr(json, "loads", mk_dummy_json_load(config))
+        monkeypatch.setattr(passout, "_check_dirs", dummy_check_dirs)
+
+        config2 = passout.get_config()
+        assert config == config2
+
+    def test_get_config0002(self, monkeypatch):
+        """a config without a 'gpg' field gets a default one"""
+
+        config = {u"id": u"jim@bob.com"}
+        expect = {u"id": u"jim@bob.com", u"gpg": u"gpg2"}
+
+        monkeypatch.setattr(json, "loads", mk_dummy_json_load(config))
+        monkeypatch.setattr(passout, "_check_dirs", dummy_check_dirs)
+
+        config = passout.get_config()
+        assert config == expect
+
+    def test_get_config0003(self, monkeypatch):
+        """a config without a 'id' field crashes"""
+
+        config = {u"gpg": u"gpg2"}
+
+        monkeypatch.setattr(json, "loads", mk_dummy_json_load(config))
+        monkeypatch.setattr(passout, "_check_dirs", dummy_check_dirs)
+
+        with pytest.raises(passout.PassOutError):
+            config = passout.get_config()

@@ -42,11 +42,12 @@ gpg2 --gen-key
 For info on this step, see the GPG docs for more info:
 http://www.gnupg.org/gph/en/manual.html#AEN26
 
-Tell PassOut about your key:
+Tell PassOut about your key in a JSON config file:
 
 ```
-mkdir ~/.passout && echo -e "gpg=<your_gpg_binary>\nid=<your_gpg_id>\n" > \
-	~/.passout/passoutrc
+mkdir ~/.passout && echo -e \
+    '{"gpg": <your_gpg_binary>, "id": <your_gpg_id>}' > \
+	~/.passout/passout.json
 ```
 
 Where `<your_gpg_binary>` is the path to the gpg binary you want to use (I
