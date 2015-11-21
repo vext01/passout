@@ -6,6 +6,7 @@ import json
 import support
 import passout
 from passout import PassOutError
+from distutils.spawn import find_executable
 
 
 def dummy_check_dirs():
@@ -52,9 +53,8 @@ class TestLib(support.PassOutLibTest):
         assert got == []
 
     @pytest.mark.skipif(os.environ["DISPLAY"] is None, reason="No X11")
+    @pytest.mark.skipif(find_executable("xclip") is None, reason="No xclip")
     def test_clip(self, cfg, rand_pwname, rand_pw):
-        # XXX skip if xclip not found
-
         passout.add_password(cfg, rand_pwname, rand_pw)
         passout.load_clipboard(cfg, rand_pwname, testing=True)
 

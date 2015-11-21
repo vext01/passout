@@ -25,6 +25,7 @@ import subprocess
 import collections
 import logging
 import json
+import locale
 from logging import info, debug
 
 VERSION = "0.1"
@@ -161,7 +162,8 @@ def load_clipboard(cfg, pw_name, testing=False):
         except OSError:
             raise PassOutError("call to xclip failed" % cfg["gpg"])
 
-        (out, err) = pipe.communicate(passwd)
+        (out, err) = pipe.communicate(
+            passwd.encode(locale.getpreferredencoding()))
         if pipe.returncode != 0:
             raise PassOutError("xlcip returned non-zero")
 

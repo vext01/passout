@@ -18,7 +18,6 @@ import __init__ as passout
 import argparse
 import argspander
 import json
-from collections import OrderedDict
 
 
 @argspander.expand
