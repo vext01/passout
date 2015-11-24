@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-# Copyright (c) 2014, Edd Barrett <vext01@gmail.com>
+# Copyright (c) 2014-2015, Edd Barrett <vext01@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,8 @@ import getpass
 import subprocess
 import collections
 import logging
+import json
+import locale
 from logging import info, debug
 
 VERSION = "0.1"
@@ -32,7 +34,7 @@ if not PASSOUT_HOME:
     PASSOUT_HOME = os.path.join(os.environ["HOME"], ".passout")
 
 CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crytpo_store")
-CONFIG_FILE = os.path.join(PASSOUT_HOME, "passoutrc")
+CONFIG_FILE = os.path.join(PASSOUT_HOME, "passout.json")
 
 GROUP_SEP = "__"
 
@@ -124,36 +126,19 @@ def get_config():
     _check_dirs()
 
     # default config
+    # JSON library loads in unicode, so we too use unicode here
     cfg = {
-        "gpg":    "gpg2",
-        "id":     None,
+        u"gpg":    u"gpg2",
+        u"id":     None,
     }
 
     if not os.path.exists(CONFIG_FILE):
         raise PassOutError("Please create the config file '%s'" % CONFIG_FILE)
 
     with open(CONFIG_FILE, "r") as fh:
-        line_no = 0
-        for line in fh:
-            line_no += 1
-            line = line.strip()
-            if line.startswith("#") or line == "":
-                continue
+        new_cfg = json.load(fh)
 
-            elems = line.split("=")
-            if len(elems) != 2:
-                raise PassOutError(
-                    "config file '%s': syntax error on line %d" %
-                    (CONFIG_FILE, line_no)
-                )
-            (key, val) = elems
-
-            if key not in cfg.keys():
-                raise PassOutError(
-                    "config file '%s': unknown key '%s' on line %d" %
-                    (CONFIG_FILE, key, line_no)
-                )
-            cfg[key] = val
+    cfg.update(new_cfg)
 
     if not cfg["id"]:
         raise PassOutError("No 'id' in %s" % CONFIG_FILE)
@@ -177,7 +162,8 @@ def load_clipboard(cfg, pw_name, testing=False):
         except OSError:
             raise PassOutError("call to xclip failed" % cfg["gpg"])
 
-        (out, err) = pipe.communicate(passwd)
+        (out, err) = pipe.communicate(
+            passwd.encode(locale.getpreferredencoding()))
         if pipe.returncode != 0:
             raise PassOutError("xlcip returned non-zero")
 

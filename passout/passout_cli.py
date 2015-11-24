@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2014, Edd Barrett <vext01@gmail.com>
+# Copyright (c) 2014-2015 Edd Barrett <vext01@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 import __init__ as passout
 import argparse
 import argspander
+import json
 
 
 @argspander.expand
@@ -49,7 +50,10 @@ def cmd_clip(cfg, pass_name):
 
 @argspander.expand
 def cmd_printconfig(cfg):
-    print(cfg)
+    # The json.dumps with sorted keys is a way to work around
+    # Python 3's non-deterministic dictionary ordering.
+    # We need an order for tests.
+    print(json.dumps(cfg, sort_keys=True))
 
 
 @argspander.expand
