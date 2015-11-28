@@ -19,8 +19,8 @@ in Python 3. You can set it up in minutes.
 
 ## Dependencies
 
-  * GPG.
-  * Python 2.7 or 3 (2.7 may be deprecated soon).
+  * GnuPG version 1 or 2 (2 recommended)
+  * Python 2.7 or >=3.3 (2.7 may be deprecated soon).
   * A GUI pinentry program, e.g. `gtk-pinentry-2` (for X11 integration only).
   * PyGobject (System tray integration only).
 
