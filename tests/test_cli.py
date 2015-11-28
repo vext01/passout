@@ -66,7 +66,7 @@ class TestCLI(support.PassOutCliTest):
         child2 = self.run_passout("rm", rand_pwname)
         child2.expect_exact(pexpect.EOF)
 
-    @pytest.mark.skipif(os.environ["DISPLAY"] is None, reason="No X11")
+    @pytest.mark.skipif("DISPLAY" not in os.environ, reason="No X11")
     @pytest.mark.skipif(find_executable("xclip") is None, reason="No xclip")
     @pytest.mark.xfail(sys.version_info.major == 3, reason="broken in Py3")
     def test_clip(self, rand_pwname, rand_pw):

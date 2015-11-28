@@ -52,7 +52,7 @@ class TestLib(support.PassOutLibTest):
         got = passout.get_password_names()
         assert got == []
 
-    @pytest.mark.skipif(os.environ["DISPLAY"] is None, reason="No X11")
+    @pytest.mark.skipif("DISPLAY" not in os.environ, reason="No X11")
     @pytest.mark.skipif(find_executable("xclip") is None, reason="No xclip")
     def test_clip(self, cfg, rand_pwname, rand_pw):
         passout.add_password(cfg, rand_pwname, rand_pw)
