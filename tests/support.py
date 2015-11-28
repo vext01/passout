@@ -41,7 +41,11 @@ def _find_gpg():
 
 def _make_key(gpg):
     gpg_cmd = sh.Command(gpg)
-    gpg_cmd("--batch", "--gen-key", "--debug-quick-random", GPG_TEMPLATE)
+    if gpg == "gpg2":
+        gpg_cmd("--batch", "--gen-key", "--debug-quick-random", GPG_TEMPLATE)
+    else:
+        # GPG 1 does not support quick random mode.
+        gpg_cmd("--batch", "--gen-key", GPG_TEMPLATE)
 
 
 def _remove_passout_dir():
