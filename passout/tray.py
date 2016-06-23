@@ -13,6 +13,8 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 try:
+    import gi
+    gi.require_version('Gtk', '3.0')
     from gi.repository import Gtk
 except ImportError:
     print("No GTK support for Python found, cannot run tray")
