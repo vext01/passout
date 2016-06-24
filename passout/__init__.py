@@ -33,7 +33,7 @@ PASSOUT_HOME = os.environ.get("PASSOUT_HOME")
 if not PASSOUT_HOME:
     PASSOUT_HOME = os.path.join(os.environ["HOME"], ".passout")
 
-CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crytpo_store")
+CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crypto_store")
 CONFIG_FILE = os.path.join(PASSOUT_HOME, "passout.json")
 
 GROUP_SEP = "__"
