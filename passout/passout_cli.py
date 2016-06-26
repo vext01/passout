@@ -18,6 +18,8 @@ import __init__ as passout
 import argparse
 import argspander
 import json
+import time
+from logging import info
 
 
 @argspander.expand
@@ -46,6 +48,14 @@ def cmd_stdout(cfg, pass_name):
 def cmd_clip(cfg, pass_name):
     """ Puts a password in the GUI clipboard """
     passout.load_clipboard(cfg, pass_name)
+
+    secs = cfg["clip_clear_time"]
+    if secs > 0:
+        info("Clipboard loaded. Destroying in %s second(s)..." % secs)
+        time.sleep(secs)
+        passout.clear_clipboard()
+
+
 
 
 @argspander.expand

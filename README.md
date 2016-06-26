@@ -113,6 +113,21 @@ To run the test suite, from the source directory run:
 py.test tests/
 ```
 
+## Configuration File
+
+PassOut is configured with a config file at `~/.passout/passout.json`.
+
+The following fields are required:
+
+ * `id`: The GnuPG key ID to use.
+
+Then the following fields are optional:
+
+ * `gpg`: Path to the GnuPG binary to use. (Default=`"gpg2"`).
+ * `clip_clear_time`: Seconds after loading the clipboard before
+   auto-destruction. (Default=`5`).
+
+
 ## Truobleshooting
 
 Try setting the `PASSOUT_DEBUG` environment. You can set this to any of

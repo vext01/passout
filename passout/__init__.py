@@ -26,6 +26,7 @@ import collections
 import logging
 import json
 import locale
+import distutils.spawn
 from logging import info, debug
 
 VERSION = "0.1"
@@ -37,7 +38,8 @@ CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crypto_store")
 CONFIG_FILE = os.path.join(PASSOUT_HOME, "passout.json")
 
 GROUP_SEP = "__"
-
+NOTIFY_SEND = distutils.spawn.find_executable("notify-send")
+XCLIP_CLIPBOARDS = ["primary", "secondary", "clipboard"]
 
 class PassOutError(Exception):
     pass
@@ -49,6 +51,11 @@ if DEBUG_LEVEL is not None:
 
     attr = getattr(logging, DEBUG_LEVEL)
     logging.basicConfig(level=attr)
+
+
+def notify_send(message):
+    if NOTIFY_SEND:
+        subprocess.check_call([NOTIFY_SEND, message])
 
 
 def _check_dirs():
@@ -77,6 +84,32 @@ def _sort_dict(dct):
             new_dct[k] = _sort_dict(v)
 
     return new_dct
+
+
+def clear_clipboard():
+    """Overwrite all clipboards with the empty string"""
+
+    for clip in XCLIP_CLIPBOARDS:
+        _load_clipboard(clip, "")
+
+    notify_send("Clipboards cleared")
+
+
+def _load_clipboard(clip, val):
+    info("Loading '%s' clipboard" % clip)
+
+    xclip_args = ("xclip", "-i", "-selection", clip)
+    debug("xclip args: %s" % " ".join(xclip_args))
+    try:
+        pipe = subprocess.Popen(xclip_args,  stdin=subprocess.PIPE)
+    except OSError:
+        raise PassOutError("call to xclip failed" % cfg["gpg"])
+
+    (out, err) = pipe.communicate(
+        val.encode(locale.getpreferredencoding()))
+    if pipe.returncode != 0:
+        raise PassOutError("xlcip returned non-zero")
+
 
 # //////// Exposed API functions below //////////////
 
@@ -128,8 +161,9 @@ def get_config():
     # default config
     # JSON library loads in unicode, so we too use unicode here
     cfg = {
-        u"gpg":    u"gpg2",
-        u"id":     None,
+        u"gpg":             u"gpg2",
+        u"id":              None,
+        u"clip_clear_time":  5,
     }
 
     if not os.path.exists(CONFIG_FILE):
@@ -146,26 +180,14 @@ def get_config():
     return cfg
 
 
-XCLIP_CLIPBOARDS = ["primary", "secondary", "clipboard"]
-
-
 def load_clipboard(cfg, pw_name, testing=False):
+    """Load all of the clipboards with a password"""
 
     passwd = get_password(cfg, pw_name, testing)
-
     for clip in XCLIP_CLIPBOARDS:
-        try:
-            info("Loading '%s' clipboard" % clip)
-            xclip_args = ("xclip", "-i", "-selection", clip)
-            debug("xclip args: %s" % " ".join(xclip_args))
-            pipe = subprocess.Popen(xclip_args,  stdin=subprocess.PIPE)
-        except OSError:
-            raise PassOutError("call to xclip failed" % cfg["gpg"])
+        _load_clipboard(clip, passwd)
 
-        (out, err) = pipe.communicate(
-            passwd.encode(locale.getpreferredencoding()))
-        if pipe.returncode != 0:
-            raise PassOutError("xlcip returned non-zero")
+    notify_send("Loaded password '%s' into clipboard" % pw_name)
 
 
 def get_password_names():

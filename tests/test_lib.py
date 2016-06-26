@@ -63,6 +63,11 @@ class TestLib(support.PassOutLibTest):
             data = support.get_clipboard_text(clip)
             assert data == rand_pw
 
+        passout.clear_clipboard()
+        for clip in passout.XCLIP_CLIPBOARDS:
+            data = support.get_clipboard_text(clip)
+            assert data == ""
+
     def test_rm_nonexisting_pw(self, rand_pwname):
         with pytest.raises(PassOutError) as exc_info:
             passout.remove_password(rand_pwname)
@@ -136,7 +141,7 @@ class TestLib(support.PassOutLibTest):
         """If we specify all config options, we get back a dict
         simply containing those options"""
 
-        config = {u"id": u"jim@bob.com", u"gpg": u"gpg2"}
+        config = {u"clip_clear_time": 5, u"id": u"jim@bob.com", u"gpg": u"gpg2"}
 
         monkeypatch.setattr(json, "loads", mk_dummy_json_load(config))
         monkeypatch.setattr(passout, "_check_dirs", dummy_check_dirs)
@@ -148,7 +153,7 @@ class TestLib(support.PassOutLibTest):
         """a config without a 'gpg' field gets a default one"""
 
         config = {u"id": u"jim@bob.com"}
-        expect = {u"id": u"jim@bob.com", u"gpg": u"gpg2"}
+        expect = {u"clip_clear_time": 5, u"id": u"jim@bob.com", u"gpg": u"gpg2"}
 
         monkeypatch.setattr(json, "loads", mk_dummy_json_load(config))
         monkeypatch.setattr(passout, "_check_dirs", dummy_check_dirs)
