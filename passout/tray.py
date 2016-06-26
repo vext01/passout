@@ -19,9 +19,8 @@ try:
 except ImportError:
     print("No GTK support for Python found, cannot run tray")
 
-import subprocess
 from passout import (get_password_names_grouped, clear_clipboard,
-                     load_clipboard, notify_send)
+                     load_clipboard)
 
 
 class PasswordMenuItem(Gtk.MenuItem):

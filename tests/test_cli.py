@@ -1,11 +1,7 @@
 import os
-
 import pexpect
 import pytest
-import sys
-
 import support
-
 from passout import VERSION
 from distutils.spawn import find_executable
 

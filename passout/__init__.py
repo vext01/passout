@@ -40,11 +40,13 @@ CONFIG_FILE = os.path.join(PASSOUT_HOME, "passout.json")
 GROUP_SEP = "__"
 NOTIFY_SEND = distutils.spawn.find_executable("notify-send")
 XCLIP_CLIPBOARDS = ["primary", "secondary", "clipboard"]
+DEBUG_LEVEL = os.environ.get("PASSOUT_DEBUG", None)
+
 
 class PassOutError(Exception):
     pass
 
-DEBUG_LEVEL = os.environ.get("PASSOUT_DEBUG", None)
+
 if DEBUG_LEVEL is not None:
     if DEBUG_LEVEL not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
         raise PassOutError("Invalid debug level")
@@ -103,7 +105,7 @@ def _load_clipboard(clip, val):
     try:
         pipe = subprocess.Popen(xclip_args,  stdin=subprocess.PIPE)
     except OSError:
-        raise PassOutError("call to xclip failed" % cfg["gpg"])
+        raise PassOutError("call to xclip failed")
 
     (out, err) = pipe.communicate(
         val.encode(locale.getpreferredencoding()))

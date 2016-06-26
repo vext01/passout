@@ -56,8 +56,6 @@ def cmd_clip(cfg, pass_name):
         passout.clear_clipboard()
 
 
-
-
 @argspander.expand
 def cmd_printconfig(cfg):
     # The json.dumps with sorted keys is a way to work around
