@@ -1,11 +1,7 @@
 import os
-
 import pexpect
 import pytest
-import sys
-
 import support
-
 from passout import VERSION
 from distutils.spawn import find_executable
 
@@ -26,7 +22,7 @@ class TestCLI(support.PassOutCliTest):
 
     def test_config(self):
         child1 = self.run_passout("config")
-        child1.expect('{"gpg": ".*?", "id": ".*?"}')
+        child1.expect('{"clip_clear_time": 5, "gpg": ".*?", "id": ".*?"}')
         child1.expect(pexpect.EOF)
 
     def test_ls(self, rand_pwname, rand_pw):
@@ -84,6 +80,7 @@ class TestCLI(support.PassOutCliTest):
         # clipboard. It works outside tests though. Why is beyond me, but seems
         # like a race condition perhaps. Luckily we have a library-level test
         # for clipboards which does work.
+        # XXX if this ever is fixed, add a test to check clearing also works.
 
         # Testing all clipboards
         import passout

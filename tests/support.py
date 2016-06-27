@@ -25,7 +25,8 @@ PASSOUT = os.path.join(SOURCE_DIR, "passout", "passout_cli.py")
 PASSOUT_CONFIG = os.path.join(PASSOUT_DIR, "passout.json")
 
 sys.path.append(os.path.join(TEST_DIR, ".."))
-import passout
+if True:
+    import passout  # work around PEP8, sigh
 
 
 class TestError(Exception):

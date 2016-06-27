@@ -19,12 +19,8 @@ try:
 except ImportError:
     print("No GTK support for Python found, cannot run tray")
 
-import subprocess
-import distutils.spawn
-
-from passout import get_password_names_grouped, load_clipboard
-
-NOTIFY_SEND = distutils.spawn.find_executable("notify-send")
+from passout import (get_password_names_grouped, clear_clipboard,
+                     load_clipboard)
 
 
 class PasswordMenuItem(Gtk.MenuItem):
@@ -48,15 +44,13 @@ class PassoutSysTrayApp(object):
         # self.tray.set_tooltip("PassOut")
         self.tray.set_visible(True)
 
-    def _notify(self, message):
-        if NOTIFY_SEND:
-            subprocess.check_call([NOTIFY_SEND, message])
-
     def clip_password(self, item):
         pwname = item.password_name
-
         load_clipboard(self.cfg, pwname)
-        self._notify("Loaded password '%s' into clipboard" % pwname)
+
+        from gi.repository import GObject
+        GObject.timeout_add_seconds(
+            self.cfg["clip_clear_time"], clear_clipboard)
 
     def _add_items_to_menu(self, menu, item_dct, cur_path=tuple()):
         """Recursively add items to the menu"""

@@ -15,12 +15,13 @@ tools were either too heavyweight, or required me to type the master
 password every time I needed to access the password store.
 
 Therefore, I hacked up PassOut; a super-mega easy password manager written
-in Python 3. You can set it up in minutes.
+in Python. You can set it up in minutes.
 
 ## Dependencies
 
   * GnuPG version 1 or 2 (2 recommended)
   * Python 2.7 or >=3.3 (2.7 may be deprecated soon).
+  * The argspander module.
   * A GUI pinentry program, e.g. `gtk-pinentry-2` (for X11 integration only).
   * PyGobject (System tray integration only).
 
@@ -29,7 +30,6 @@ For developers:
   * pytest.
   * The pexpect module.
   * The sh module.
-  * The argspander module.
 
 ## Quick Start
 
@@ -112,6 +112,21 @@ To run the test suite, from the source directory run:
 ```
 py.test tests/
 ```
+
+## Configuration File
+
+PassOut is configured with a config file at `~/.passout/passout.json`.
+
+The following fields are required:
+
+ * `id`: The GnuPG key ID to use.
+
+Then the following fields are optional:
+
+ * `gpg`: Path to the GnuPG binary to use. (Default=`"gpg2"`).
+ * `clip_clear_time`: Seconds after loading the clipboard before
+   auto-destruction. (Default=`5`).
+
 
 ## Truobleshooting
 
