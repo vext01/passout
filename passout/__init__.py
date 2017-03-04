@@ -232,7 +232,10 @@ def add_password(cfg, pw_name, passwd=None):
     gpg_args = (cfg["gpg"], "-u", cfg["id"], "-e", "-r", cfg["id"])
     debug("Calling GPG tool with args: %s" % (gpg_args, ))
 
-    fd = os.open(out_file, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR)
+    # We create the file r/w so that automated file synchronisers (e.g.
+    # syncthing) can delete the password files if they so wish.
+    fd = os.open(out_file, os.O_WRONLY | os.O_CREAT,
+                 stat.S_IRUSR | stat.S_IWUSR)
     try:
         pipe = subprocess.Popen(
             gpg_args,  stdin=subprocess.PIPE, stdout=fd,
