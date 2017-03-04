@@ -128,5 +128,6 @@ def entrypoint():
     args = parser.parse_args()
     args.func(args, expand=True)
 
+
 if __name__ == "__main__":
     entrypoint()
