@@ -165,7 +165,7 @@ def get_config():
     cfg = {
         u"gpg":             u"gpg2",
         u"id":              None,
-        u"clip_clear_time":  5,
+        u"clip_clear_time": 5,
     }
 
     if not os.path.exists(CONFIG_FILE):
