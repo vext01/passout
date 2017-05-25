@@ -185,6 +185,7 @@ def get_config():
 def load_clipboard(cfg, pw_name, testing=False):
     """Load all of the clipboards with a password"""
 
+    info("loading clipboards")
     passwd = get_password(cfg, pw_name, testing)
     for clip in XCLIP_CLIPBOARDS:
         _load_clipboard(clip, passwd)
