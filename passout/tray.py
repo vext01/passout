@@ -49,10 +49,12 @@ class PassoutSysTrayApp(object):
         pwname = item.password_name
         load_clipboard(self.cfg, pwname)
 
-        debug("clearing clipboard after %s seconds" % self.cfg["clip_clear_time"])
+        debug("clearing clipboard after %s seconds" %
+              self.cfg["clip_clear_time"])
         from gi.repository import GObject
+
         GObject.timeout_add_seconds(
-            self.cfg["clip_clear_time"], clear_clipboard)
+            self.cfg["clip_clear_time"], lambda: clear_clipboard(self.cfg))
 
     def _add_items_to_menu(self, menu, item_dct, cur_path=tuple()):
         """Recursively add items to the menu"""
