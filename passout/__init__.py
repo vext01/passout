@@ -26,7 +26,6 @@ import collections
 import logging
 import json
 import locale
-import distutils.spawn
 from logging import info, debug
 
 VERSION = "0.1"
@@ -38,7 +37,6 @@ CRYPTO_DIR = os.path.join(PASSOUT_HOME, "crypto_store")
 CONFIG_FILE = os.path.join(PASSOUT_HOME, "passout.json")
 
 GROUP_SEP = "__"
-NOTIFY_SEND = distutils.spawn.find_executable("notify-send")
 XCLIP_CLIPBOARDS = ["primary", "secondary", "clipboard"]
 DEBUG_LEVEL = os.environ.get("PASSOUT_DEBUG", None)
 
@@ -55,9 +53,9 @@ if DEBUG_LEVEL is not None:
     logging.basicConfig(level=attr)
 
 
-def notify_send(message):
-    if NOTIFY_SEND:
-        subprocess.check_call([NOTIFY_SEND, message])
+def notify_send(cfg, message):
+    if cfg["notify_cmd"]:
+        subprocess.check_call([cfg["notify_cmd"], message])
 
 
 def _check_dirs():
@@ -88,13 +86,13 @@ def _sort_dict(dct):
     return new_dct
 
 
-def clear_clipboard():
+def clear_clipboard(cfg):
     """Overwrite all clipboards with the empty string"""
 
     for clip in XCLIP_CLIPBOARDS:
         _load_clipboard(clip, "")
 
-    notify_send("Clipboards cleared")
+    notify_send(cfg, "Clipboards cleared")
 
 
 def _load_clipboard(clip, val):
@@ -165,7 +163,8 @@ def get_config():
     cfg = {
         u"gpg":             u"gpg2",
         u"id":              None,
-        u"clip_clear_time":  5,
+        u"clip_clear_time": 5,
+        u"notify_cmd":      u"",
     }
 
     if not os.path.exists(CONFIG_FILE):
@@ -185,11 +184,12 @@ def get_config():
 def load_clipboard(cfg, pw_name, testing=False):
     """Load all of the clipboards with a password"""
 
+    info("loading clipboards")
     passwd = get_password(cfg, pw_name, testing)
     for clip in XCLIP_CLIPBOARDS:
         _load_clipboard(clip, passwd)
 
-    notify_send("Loaded password '%s' into clipboard" % pw_name)
+    notify_send(cfg, "Loaded password '%s' into clipboard" % pw_name)
 
 
 def get_password_names():

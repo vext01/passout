@@ -63,7 +63,7 @@ class TestLib(support.PassOutLibTest):
             data = support.get_clipboard_text(clip)
             assert data == rand_pw
 
-        passout.clear_clipboard()
+        passout.clear_clipboard(cfg)
         for clip in passout.XCLIP_CLIPBOARDS:
             data = support.get_clipboard_text(clip)
             assert data == ""
@@ -142,7 +142,7 @@ class TestLib(support.PassOutLibTest):
         simply containing those options"""
 
         config = {u"clip_clear_time": 5, u"id": u"jim@bob.com",
-                  u"gpg": u"gpg2"}
+                  u"gpg": u"gpg2", "notify_cmd": "doit"}
 
         monkeypatch.setattr(json, "loads", mk_dummy_json_load(config))
         monkeypatch.setattr(passout, "_check_dirs", dummy_check_dirs)
@@ -151,11 +151,12 @@ class TestLib(support.PassOutLibTest):
         assert config == config2
 
     def test_get_config0002(self, monkeypatch):
-        """a config without a 'gpg' field gets a default one"""
+        """a config with only the mandatory id field gives default values for
+        the other fields"""
 
         config = {u"id": u"jim@bob.com"}
         expect = {u"clip_clear_time": 5, u"id": u"jim@bob.com",
-                  u"gpg": u"gpg2"}
+                  u"gpg": u"gpg2", "notify_cmd": ""}
 
         monkeypatch.setattr(json, "loads", mk_dummy_json_load(config))
         monkeypatch.setattr(passout, "_check_dirs", dummy_check_dirs)

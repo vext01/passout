@@ -53,7 +53,7 @@ def cmd_clip(cfg, pass_name):
     if secs > 0:
         info("Clipboard loaded. Destroying in %s second(s)..." % secs)
         time.sleep(secs)
-        passout.clear_clipboard()
+        passout.clear_clipboard(cfg)
 
 
 @argspander.expand

@@ -127,17 +127,19 @@ py.test tests/
 
 ## Configuration File
 
-PassOut is configured with a config file at `~/.passout/passout.json`.
+PassOut is configured with a JSON config file at `~/.passout/passout.json`.
 
-The following fields are required:
+The following key is required:
 
- * `id`: The GnuPG key ID to use.
+ * `id`: The GnuPG key hash/email to use.
 
 Then the following fields are optional:
 
  * `gpg`: Path to the GnuPG binary to use. (Default=`"gpg2"`).
  * `clip_clear_time`: Seconds after loading the clipboard before
    auto-destruction. (Default=`5`).
+ * `notify_cmd`: Command used to notify of clipboard load/clears. Typically you
+   would set this to `"notify-send"`. (Default=None).
 
 
 ## Troubleshooting
